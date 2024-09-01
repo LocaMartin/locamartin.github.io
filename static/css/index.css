@@ -1,0 +1,53 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(29, 177, 177);
+}
+
+/*========================= content ============================*/
+#navbar {
+    height: 50px;
+    width: 100%;
+    margin: 0%;
+    padding: 0%;
+    background-color: antiquewhite;
+    border: 1px solid black;
+}
+
+#logo {
+    height: 50px;
+    width: 50px;
+    margin: 0%;
+    padding: 0%;
+}
+
+#blog {
+    width: 50px;
+    background-color: red;
+}
+/*================================ 0 ============================*/
+
+/*========================= content ==============================*/
+#content {
+    height: 700px;
+    width: 100%;
+    border: 1px solid black;
+}
+
+#imageContainer img {
+    height: 50px;
+    width: 50px;
+}
+/*================================= 0 ============================*/
+
+/*============================ footer ============================*/
+#footer {
+    height: 170px;
+    width: 100%;
+    border: 1px solid black;
+    background-color: rgb(121, 115, 115);
+}
+/*================================= 0 ============================*/
