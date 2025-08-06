@@ -1,461 +1,155 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="5; url=https://github.com/LocaMartin">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SYSTEM REDIRECTION</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <meta charset="UTF-8" />
+  <title>Redirecting...</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self';">
 
+  <!-- Load local Digital-7 font -->
+  <style>
+    @font-face {
+      font-family: 'Digital-7';
+      src: url('./digital-7.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+  </style>
+
+  <style>
     body {
-      background-color: #000;
-      color: #0ff;
-      font-family: 'Share Tech Mono', monospace;
-      min-height: 100vh;
+      background-color: black;
+      margin: 0;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
+      font-family: 'Share Tech Mono', monospace;
       overflow: hidden;
-      position: relative;
-      perspective: 1000px;
-    }
-
-    #matrix {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      opacity: 0.3;
-    }
-
-    .glitch-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="2" height="2" fill="rgba(0,255,255,0.1)"/></svg>');
-      background-size: 20px 20px;
-      opacity: 0.7;
-      pointer-events: none;
-      z-index: 1;
     }
 
     .container {
-      text-align: center;
-      z-index: 10;
+      display: flex;
+      align-items: center;
       position: relative;
-      padding: 3rem;
-      background: rgba(10, 15, 30, 0.8);
-      border: 1px solid #0ff;
-      box-shadow: 
-        0 0 20px rgba(0, 255, 255, 0.6),
-        0 0 40px rgba(0, 100, 255, 0.4),
-        inset 0 0 15px rgba(0, 200, 255, 0.3);
-      border-radius: 4px;
-      max-width: 800px;
-      width: 90%;
-      backdrop-filter: blur(5px);
-      transform: translateZ(20px);
-      animation: float 6s infinite ease-in-out;
     }
 
-    .glitch-box {
+    .progress-wrapper {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .redirecting-label {
+      position: absolute;
+      top: -30px;
+      left: 10px;
+      font-size: 28px;
+      color: cyan;
+      font-style: italic;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      display: flex;
+      transform: skewX(-15deg);
+      padding: 4px;
+      border-radius: 5px;
+      background-color: black;
+      border: 3px solid cyan;
+    }
+
+    .segment {
+      width: 20px;
+      height: 40px;
+      margin-right: 2px;
+      background-color: black;
+      border: 2px solid cyan;
+    }
+
+    .segment.filled {
+      background-color: rgb(0, 119, 255);
+    }
+
+    .segment-inner {
+      transform: skewX(15deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .percentage {
+      font-family: 'Digital-7', monospace;
+      font-size: 28px;
+      color: cyan;
+      margin-left: 15px;
+      letter-spacing: 2px;
+    }
+
+    .fade-screen {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      background: black;
+      opacity: 0;
       pointer-events: none;
-      z-index: -1;
+      transition: opacity 1s ease-in-out;
+      z-index: 10;
     }
 
-    .glitch-box::before, .glitch-box::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: inherit;
-      opacity: 0;
-    }
-
-    .glitch-box::before {
-      left: -5px;
-      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-      background: rgba(255, 0, 255, 0.3);
-    }
-
-    .glitch-box::after {
-      left: 5px;
-      clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-      background: rgba(0, 255, 255, 0.3);
-    }
-
-    .container:hover .glitch-box::before,
-    .container:hover .glitch-box::after {
-      animation: glitch-anim 0.3s infinite;
-    }
-
-    h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 3.5rem;
-      text-transform: uppercase;
-      letter-spacing: 6px;
-      margin-bottom: 2rem;
-      text-shadow: 
-        0 0 10px #00eeff, 
-        0 0 20px #00eeff,
-        0 0 30px #0088ff;
-      position: relative;
-      animation: glitch 3s infinite;
-    }
-
-    .countdown-container {
-      margin: 2rem 0;
-      position: relative;
-    }
-
-    .countdown {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 6rem;
-      font-weight: 900;
-      color: #f0f;
-      text-shadow: 
-        0 0 15px #ff00c8, 
-        0 0 30px rgba(255, 0, 200, 0.7),
-        0 0 45px rgba(255, 0, 200, 0.4);
-      animation: pulse 1s infinite alternate;
-    }
-
-    .message {
-      font-size: 1.5rem;
-      margin: 1.5rem 0;
-      color: #0ff;
-      line-height: 1.6;
-      letter-spacing: 1px;
-    }
-
-    .redirect-link {
-      display: inline-block;
-      margin-top: 1.5rem;
-      padding: 12px 30px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.2rem;
-      text-decoration: none;
-      color: #f0f;
-      border: 2px solid #f0f;
-      border-radius: 2px;
-      background: rgba(255, 0, 200, 0.1);
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 10px rgba(255, 0, 200, 0.3);
-    }
-
-    .redirect-link:hover {
-      background: rgba(255, 0, 200, 0.3);
-      box-shadow: 0 0 20px #ff00c8;
-      transform: translateY(-3px);
-      text-shadow: 0 0 10px #ff00c8;
-    }
-
-    .redirect-link::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-      transition: 0.5s;
-    }
-
-    .redirect-link:hover::before {
-      left: 100%;
-    }
-
-    .scan-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: rgba(0, 238, 255, 0.8);
-      box-shadow: 0 0 15px 3px rgba(0, 238, 255, 0.9);
-      animation: scan 4s linear infinite;
-      z-index: 5;
-    }
-
-    .terminal-code {
-      font-family: 'Share Tech Mono', monospace;
-      background: rgba(0, 10, 20, 0.7);
-      padding: 15px;
-      margin: 20px 0;
-      text-align: left;
-      border-left: 3px solid #00eeff;
-      overflow: hidden;
-      position: relative;
-      max-height: 150px;
-      box-shadow: inset 0 0 10px rgba(0, 100, 255, 0.5);
-    }
-
-    .code-line {
-      margin-bottom: 8px;
-      opacity: 0;
-      animation: appear 0.3s forwards;
-      color: #0f0;
-      text-shadow: 0 0 5px #0f0;
-    }
-
-    .code-line:nth-child(1) { animation-delay: 0.5s; }
-    .code-line:nth-child(2) { animation-delay: 1.0s; }
-    .code-line:nth-child(3) { animation-delay: 1.5s; }
-    .code-line:nth-child(4) { animation-delay: 2.0s; }
-
-    .pulse-circle {
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      border: 2px solid rgba(0, 238, 255, 0.1);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      animation: pulse-circle 4s infinite;
-      z-index: 0;
-    }
-
-    .pulse-circle:nth-child(2) {
-      animation-delay: 1s;
-      width: 400px;
-      height: 400px;
-      border-color: rgba(255, 0, 200, 0.1);
-    }
-
-    .pulse-circle:nth-child(3) {
-      animation-delay: 2s;
-      width: 500px;
-      height: 500px;
-      border-color: rgba(0, 100, 255, 0.1);
-    }
-
-    /* Animations */
-    @keyframes scan {
-      0% { top: 0%; }
-      100% { top: 100%; }
-    }
-
-    @keyframes glitch {
-      0%, 100% { 
-        text-shadow: 
-          0 0 10px #00eeff, 
-          0 0 20px #00eeff,
-          0 0 30px #0088ff;
-      }
-      20% { 
-        text-shadow: 
-          -3px -3px 0 #f0f, 
-          3px 3px 0 #0f0;
-        transform: translate(3px, -3px);
-      }
-      40% { 
-        text-shadow: 
-          3px 3px 0 #f0f, 
-          -3px -3px 0 #0f0;
-        transform: translate(-3px, 3px);
-      }
-      60% { 
-        text-shadow: 
-          -3px 3px 0 #f0f, 
-          3px -3px 0 #0f0;
-        transform: translate(3px, 3px);
-      }
-      80% { 
-        text-shadow: 
-          3px -3px 0 #f0f, 
-          -3px 3px 0 #0f0;
-        transform: translate(-3px, -3px);
-      }
-    }
-
-    @keyframes glitch-anim {
-      0% { opacity: 0.8; transform: translateX(0); }
-      20% { opacity: 0.5; transform: translateX(-5px); }
-      40% { opacity: 0.6; transform: translateX(5px); }
-      60% { opacity: 0.4; transform: translateX(-3px); }
-      80% { opacity: 0.7; transform: translateX(3px); }
-      100% { opacity: 0.8; transform: translateX(0); }
-    }
-
-    @keyframes pulse {
-      0% { 
-        text-shadow: 
-          0 0 15px #ff00c8, 
-          0 0 30px rgba(255, 0, 200, 0.7),
-          0 0 45px rgba(255, 0, 200, 0.4);
-      }
-      100% { 
-        text-shadow: 
-          0 0 20px #ff00c8, 
-          0 0 40px rgba(255, 0, 200, 0.9),
-          0 0 60px rgba(255, 0, 200, 0.6);
-        transform: scale(1.05);
-      }
-    }
-
-    @keyframes pulse-circle {
-      0% { opacity: 1; transform: translate(-50%, -50%) scale(0.8); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
-    }
-
-    @keyframes appear {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0) rotate(0.5deg); }
-      50% { transform: translateY(-10px) rotate(-0.5deg); }
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-      h1 { font-size: 2.5rem; }
-      .countdown { font-size: 4rem; }
-      .message { font-size: 1.2rem; }
-      .container { padding: 1.5rem; }
+    .fade-screen.visible {
+      opacity: 1;
     }
   </style>
 </head>
 <body>
-  <canvas id="matrix"></canvas>
-  <div class="glitch-layer"></div>
-  <div class="scan-line"></div>
-  
-  <div class="pulse-circle"></div>
-  <div class="pulse-circle"></div>
-  <div class="pulse-circle"></div>
-  
-  <div class="container">
-    <div class="glitch-box"></div>
-    
-    <h1 data-text="SYSTEM REDIRECTION">SYSTEM REDIRECTION</h1>
-    
-    <div class="terminal-code">
-      <div class="code-line">> INITIATING TRANSPORT SEQUENCE...</div>
-      <div class="code-line">> CONNECTING TO GITHUB NETWORK...</div>
-      <div class="code-line">> SECURITY PROTOCOL: VERIFIED</div>
-      <div class="code-line">> TARGET: LOCAMARTIN REPOSITORIES</div>
+
+<div class="container">
+  <div class="progress-wrapper">
+    <div class="redirecting-label">REDIRECTING</div>
+
+    <div class="progress-bar" id="progressBar">
+      <!-- Segments will be filled by JS -->
     </div>
-    
-    <div class="message">
-      You are being transported to the developer's GitHub dimension
-    </div>
-    
-    <div class="countdown-container">
-      <div class="countdown">5</div>
-    </div>
-    
-    <div class="message">
-      Quantum entanglement in progress. Hold position.
-    </div>
-    
-    <a href="https://github.com/LocaMartin" class="redirect-link">MANUAL REDIRECT</a>
+
+    <div class="percentage" id="percentageText">0%</div>
   </div>
-  
-  <script>
-    // Matrix-style code rain effect
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
-    
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&()/<>{}[]";
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    
-    const drops = [];
-    for(let i = 0; i < columns; i++) {
-      drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
-    }
-    
-    function drawMatrix() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      ctx.fillStyle = '#0f0';
-      ctx.font = `${fontSize}px 'Share Tech Mono'`;
-      
-      for(let i = 0; i < drops.length; i++) {
-        const text = chars.charAt(Math.floor(Math.random() * chars.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        
-        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
-        drops[i]++;
-      }
-    }
-    
-    setInterval(drawMatrix, 33);
-    
-    // Countdown and redirect logic
-    document.addEventListener('DOMContentLoaded', function() {
-      const countdownElement = document.querySelector('.countdown');
-      let count = 5;
-      
-      const countdown = setInterval(() => {
-        count--;
-        countdownElement.textContent = count;
-        
-        // Add glitch effect at certain counts
-        if (count === 3 || count === 1) {
-          document.body.style.animation = 'glitch 0.3s';
-          setTimeout(() => {
-            document.body.style.animation = '';
-          }, 300);
-        }
-        
-        if (count <= 0) {
-          clearInterval(countdown);
-          // Add final effects before redirect
-          document.body.style.animation = 'glitch 0.3s';
-          setTimeout(() => {
-            window.location.href = 'https://github.com/LocaMartin';
-          }, 300);
-        }
+</div>
+
+<div class="fade-screen" id="fadeScreen"></div>
+
+<script>
+(function() {
+  const totalSegments = 20;
+  const bar = document.getElementById('progressBar');
+  const percentageText = document.getElementById('percentageText');
+  const fadeScreen = document.getElementById('fadeScreen');
+  const redirectURL = "https://github.com/LocaMartin";
+
+  // Generate segments
+  for (let i = 0; i < totalSegments; i++) {
+    const segment = document.createElement('div');
+    segment.classList.add('segment');
+    segment.innerHTML = '<div class="segment-inner"></div>';
+    bar.appendChild(segment);
+  }
+
+  let filled = 0;
+  const interval = setInterval(() => {
+    if (filled < totalSegments) {
+      bar.children[filled].classList.add('filled');
+      filled++;
+      percentageText.textContent = Math.round((filled / totalSegments) * 100) + '%';
+    } else {
+      clearInterval(interval);
+      fadeScreen.classList.add('visible');
+      setTimeout(() => {
+        window.location.href = redirectURL;
       }, 1000);
-      
-      // Add random glitches
-      setInterval(() => {
-        if (Math.random() > 0.7) {
-          document.querySelector('.container').style.animation = 'glitch 0.2s';
-          setTimeout(() => {
-            document.querySelector('.container').style.animation = '';
-          }, 200);
-        }
-      }, 2000);
-    });
-    
-    // Window resize handling
-    window.addEventListener('resize', function() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    });
-  </script>
+    }
+  }, 200);
+})();
+</script>
+
 </body>
 </html>
