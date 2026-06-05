@@ -1,669 +1,868 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Private Dashboard</title>
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="utf-8" />
+    <title>Private Dashboard</title>
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'
+    ></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    background-attachment: fixed;
-    color: #fff;
-  }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+        background-attachment: fixed;
+        color: #fff;
+      }
 
-  /* ── Floating orbs background ── */
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.25;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .orb1 { width: 500px; height: 500px; background: #6c63ff; top: -100px; left: -100px; }
-  .orb2 { width: 400px; height: 400px; background: #ff6584; bottom: -80px; right: -80px; }
-  .orb3 { width: 300px; height: 300px; background: #43e8d8; top: 40%; left: 40%; }
+      /* ── Floating orbs background ── */
+      .orb {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.25;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .orb1 {
+        width: 500px;
+        height: 500px;
+        background: #6c63ff;
+        top: -100px;
+        left: -100px;
+      }
+      .orb2 {
+        width: 400px;
+        height: 400px;
+        background: #ff6584;
+        bottom: -80px;
+        right: -80px;
+      }
+      .orb3 {
+        width: 300px;
+        height: 300px;
+        background: #43e8d8;
+        top: 40%;
+        left: 40%;
+      }
 
-  /* ── Login screen ── */
-  #login-screen {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    gap: 16px;
-  }
-  .login-card {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 24px;
-    padding: 48px 40px;
-    text-align: center;
-    max-width: 380px;
-    width: 90%;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
-  }
-  .login-card .lock { font-size: 2.5rem; margin-bottom: 12px; }
-  .login-card h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 8px; }
-  .login-card p  { color: rgba(255,255,255,0.55); font-size: 0.9rem; margin-bottom: 24px; }
+      /* ── Login screen ── */
+      #login-screen {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        gap: 16px;
+      }
+      .login-card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 24px;
+        padding: 48px 40px;
+        text-align: center;
+        max-width: 380px;
+        width: 90%;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      }
+      .login-card .lock {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+      }
+      .login-card h1 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .login-card p {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+      }
 
-  /* ── App ── */
-  #app { display: none; position: relative; z-index: 10; }
+      /* ── App ── */
+      #app {
+        display: none;
+        position: relative;
+        z-index: 10;
+      }
 
-  /* ── Navbar ── */
-  nav {
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    padding: 0 28px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  .logo {
-    font-weight: 700;
-    font-size: 1.15rem;
-    letter-spacing: 2px;
-    background: linear-gradient(90deg, #a78bfa, #60a5fa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
+      /* ── Navbar ── */
+      nav {
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0 28px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .logo {
+        font-weight: 700;
+        font-size: 1.15rem;
+        letter-spacing: 2px;
+        background: linear-gradient(90deg, #a78bfa, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-  /* ── Sidebar toggle button in nav ── */
-  .menu-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    padding: 8px 14px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    transition: background 0.2s;
-  }
-  .menu-btn:hover { background: rgba(255,255,255,0.18); }
+      /* ── Sidebar toggle button in nav ── */
+      .menu-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        padding: 8px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        transition: background 0.2s;
+      }
+      .menu-btn:hover {
+        background: rgba(255, 255, 255, 0.18);
+      }
 
-  /* ── Main content ── */
-  .main-content {
-    padding: 48px 32px;
-    max-width: 960px;
-    margin: 0 auto;
-  }
-  .welcome-card {
-    background: rgba(255,255,255,0.07);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 20px;
-    padding: 36px 32px;
-  }
-  .welcome-card h2 { font-size: 1.6rem; font-weight: 600; margin-bottom: 8px; }
-  .welcome-card p  { color: rgba(255,255,255,0.5); font-size: 0.95rem; }
+      /* ── Main content ── */
+      .main-content {
+        padding: 48px 32px;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      .welcome-card {
+        background: rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 36px 32px;
+      }
+      .welcome-card h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .welcome-card p {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.95rem;
+      }
 
-  /* ── Overlay ── */
-  #overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(2px);
-    z-index: 200;
-  }
-  #overlay.open { display: block; }
+      /* ── Overlay ── */
+      #overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
+        z-index: 200;
+      }
+      #overlay.open {
+        display: block;
+      }
 
-  /* ── Sidebar ── */
-  #sidebar {
-    position: fixed;
-    top: 0; right: -380px;
-    width: 340px;
-    height: 100vh;
-    background: rgba(15,12,41,0.75);
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-    border-left: 1px solid rgba(255,255,255,0.12);
-    box-shadow: -8px 0 40px rgba(0,0,0,0.4);
-    z-index: 201;
-    transition: right 0.35s cubic-bezier(.4,0,.2,1);
-    display: flex;
-    flex-direction: column;
-  }
-  #sidebar.open { right: 0; }
+      /* ── Sidebar ── */
+      #sidebar {
+        position: fixed;
+        top: 0;
+        right: -380px;
+        width: 340px;
+        height: 100vh;
+        background: rgba(15, 12, 41, 0.75);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border-left: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+        z-index: 201;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+      }
+      #sidebar.open {
+        right: 0;
+      }
 
-  .sidebar-header {
-    padding: 24px 20px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .sidebar-header h2 { font-size: 1rem; font-weight: 600; color: rgba(255,255,255,0.9); }
-  .close-btn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.7);
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s;
-  }
-  .close-btn:hover { background: rgba(255,255,255,0.15); }
+      .sidebar-header {
+        padding: 24px 20px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .sidebar-header h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .close-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+      }
+      .close-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
 
-  /* ── Sidebar nav buttons ── */
-  .sidebar-nav {
-    padding: 16px 12px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.6);
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    background: none;
-    width: 100%;
-    text-align: left;
-  }
-  .nav-item:hover {
-    background: rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.95);
-    border-color: rgba(255,255,255,0.1);
-  }
-  .nav-item.active {
-    background: rgba(167,139,250,0.15);
-    color: #a78bfa;
-    border-color: rgba(167,139,250,0.3);
-  }
-  .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+      /* ── Sidebar nav buttons ── */
+      .sidebar-nav {
+        padding: 16px 12px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        background: none;
+        width: 100%;
+        text-align: left;
+      }
+      .nav-item:hover {
+        background: rgba(255, 255, 255, 0.07);
+        color: rgba(255, 255, 255, 0.95);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .nav-item.active {
+        background: rgba(167, 139, 250, 0.15);
+        color: #a78bfa;
+        border-color: rgba(167, 139, 250, 0.3);
+      }
+      .nav-item .icon {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+      }
 
-  /* ── Sidebar panels ── */
-  .sidebar-body { flex: 1; overflow-y: auto; padding: 20px 16px; }
-  .panel { display: none; }
-  .panel.active { display: block; }
+      /* ── Sidebar panels ── */
+      .sidebar-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 16px;
+      }
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
 
-  /* ── Analytics panel ── */
-  .stat-card {
-    background: rgba(167,139,250,0.12);
-    border: 1px solid rgba(167,139,250,0.25);
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .stat-card .num { font-size: 2.2rem; font-weight: 700; color: #a78bfa; }
-  .stat-card .label { color: rgba(255,255,255,0.45); font-size: 0.82rem; margin-top: 4px; }
+      /* ── Analytics panel ── */
+      .stat-card {
+        background: rgba(167, 139, 250, 0.12);
+        border: 1px solid rgba(167, 139, 250, 0.25);
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+      .stat-card .num {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #a78bfa;
+      }
+      .stat-card .label {
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 0.82rem;
+        margin-top: 4px;
+      }
 
-  .section-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: rgba(255,255,255,0.35);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 16px 0 8px;
-  }
-  .page-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 9px 12px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 8px;
-    margin-bottom: 5px;
-    font-size: 0.85rem;
-  }
-  .page-row .page-name { color: rgba(255,255,255,0.7); font-family: monospace; }
-  .page-row .page-count {
-    background: rgba(167,139,250,0.25);
-    color: #c4b5fd;
-    border-radius: 20px;
-    padding: 2px 10px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
-  .chart-wrap {
-    display: flex;
-    align-items: flex-end;
-    gap: 5px;
-    height: 70px;
-    margin-top: 4px;
-  }
-  .bar-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    height: 100%;
-    justify-content: flex-end;
-  }
-  .bar {
-    width: 100%;
-    background: linear-gradient(180deg, #a78bfa, #6d28d9);
-    border-radius: 3px 3px 0 0;
-    min-height: 2px;
-  }
-  .bar-label { font-size: 0.62rem; color: rgba(255,255,255,0.3); }
+      .section-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.35);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin: 16px 0 8px;
+      }
+      .page-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 9px 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        margin-bottom: 5px;
+        font-size: 0.85rem;
+      }
+      .page-row .page-name {
+        color: rgba(255, 255, 255, 0.7);
+        font-family: monospace;
+      }
+      .page-row .page-count {
+        background: rgba(167, 139, 250, 0.25);
+        color: #c4b5fd;
+        border-radius: 20px;
+        padding: 2px 10px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .chart-wrap {
+        display: flex;
+        align-items: flex-end;
+        gap: 5px;
+        height: 70px;
+        margin-top: 4px;
+      }
+      .bar-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        height: 100%;
+        justify-content: flex-end;
+      }
+      .bar {
+        width: 100%;
+        background: linear-gradient(180deg, #a78bfa, #6d28d9);
+        border-radius: 3px 3px 0 0;
+        min-height: 2px;
+      }
+      .bar-label {
+        font-size: 0.62rem;
+        color: rgba(255, 255, 255, 0.3);
+      }
 
-  /* ── Notes panel ── */
-  .notes-area {
-    width: 100%;
-    min-height: 260px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 14px;
-    color: rgba(255,255,255,0.85);
-    font-size: 0.88rem;
-    font-family: 'Segoe UI', sans-serif;
-    resize: vertical;
-    outline: none;
-    line-height: 1.6;
-  }
-  .notes-area:focus { border-color: rgba(167,139,250,0.5); }
-  .save-btn {
-    margin-top: 10px;
-    width: 100%;
-    padding: 10px;
-    background: rgba(167,139,250,0.2);
-    border: 1px solid rgba(167,139,250,0.35);
-    border-radius: 10px;
-    color: #c4b5fd;
-    font-size: 0.88rem;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .save-btn:hover { background: rgba(167,139,250,0.35); }
-  .save-confirm {
-    text-align: center;
-    font-size: 0.78rem;
-    color: #6ee7b7;
-    margin-top: 6px;
-    height: 16px;
-  }
+      /* ── Notes panel ── */
+      .notes-area {
+        width: 100%;
+        min-height: 260px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 14px;
+        color: rgba(255, 255, 255, 0.85);
+        font-size: 0.88rem;
+        font-family: "Segoe UI", sans-serif;
+        resize: vertical;
+        outline: none;
+        line-height: 1.6;
+      }
+      .notes-area:focus {
+        border-color: rgba(167, 139, 250, 0.5);
+      }
+      .save-btn {
+        margin-top: 10px;
+        width: 100%;
+        padding: 10px;
+        background: rgba(167, 139, 250, 0.2);
+        border: 1px solid rgba(167, 139, 250, 0.35);
+        border-radius: 10px;
+        color: #c4b5fd;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .save-btn:hover {
+        background: rgba(167, 139, 250, 0.35);
+      }
+      .save-confirm {
+        text-align: center;
+        font-size: 0.78rem;
+        color: #6ee7b7;
+        margin-top: 6px;
+        height: 16px;
+      }
 
-  /* ── Death clock panel ── */
-  .death-intro {
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-  .death-input-row {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .death-input-row label {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.45);
-    margin-bottom: 2px;
-  }
-  .death-input-row input, .death-input-row select {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 9px;
-    padding: 9px 12px;
-    color: #fff;
-    font-size: 0.88rem;
-    outline: none;
-    width: 100%;
-  }
-  .death-input-row input:focus, .death-input-row select:focus {
-    border-color: rgba(251,113,133,0.5);
-  }
-  .death-input-row select option { background: #1a1a2e; }
-  .calc-btn {
-    width: 100%;
-    padding: 10px;
-    background: rgba(251,113,133,0.15);
-    border: 1px solid rgba(251,113,133,0.3);
-    border-radius: 10px;
-    color: #fda4af;
-    font-size: 0.88rem;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 4px;
-  }
-  .calc-btn:hover { background: rgba(251,113,133,0.28); }
-  .death-result {
-    display: none;
-    margin-top: 16px;
-    background: rgba(251,113,133,0.08);
-    border: 1px solid rgba(251,113,133,0.2);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: center;
-  }
-  .death-result .est-date { font-size: 1.3rem; font-weight: 700; color: #fda4af; margin-bottom: 6px; }
-  .death-result .years-left { font-size: 0.85rem; color: rgba(255,255,255,0.45); }
-  .death-result .countdown { margin-top: 14px; display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
-  .cd-box {
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 10px 6px;
-    text-align: center;
-  }
-  .cd-box .cd-num { font-size: 1.3rem; font-weight: 700; color: #fda4af; }
-  .cd-box .cd-label { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
-  .disclaimer {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.2);
-    text-align: center;
-    margin-top: 10px;
-    line-height: 1.4;
-  }
+      /* ── Death clock panel ── */
+      .death-intro {
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.4);
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+      .death-input-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .death-input-row label {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.45);
+        margin-bottom: 2px;
+      }
+      .death-input-row input,
+      .death-input-row select {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 9px;
+        padding: 9px 12px;
+        color: #fff;
+        font-size: 0.88rem;
+        outline: none;
+        width: 100%;
+      }
+      .death-input-row input:focus,
+      .death-input-row select:focus {
+        border-color: rgba(251, 113, 133, 0.5);
+      }
+      .death-input-row select option {
+        background: #1a1a2e;
+      }
+      .calc-btn {
+        width: 100%;
+        padding: 10px;
+        background: rgba(251, 113, 133, 0.15);
+        border: 1px solid rgba(251, 113, 133, 0.3);
+        border-radius: 10px;
+        color: #fda4af;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 4px;
+      }
+      .calc-btn:hover {
+        background: rgba(251, 113, 133, 0.28);
+      }
+      .death-result {
+        display: none;
+        margin-top: 16px;
+        background: rgba(251, 113, 133, 0.08);
+        border: 1px solid rgba(251, 113, 133, 0.2);
+        border-radius: 14px;
+        padding: 18px;
+        text-align: center;
+      }
+      .death-result .est-date {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fda4af;
+        margin-bottom: 6px;
+      }
+      .death-result .years-left {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.45);
+      }
+      .death-result .countdown {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .cd-box {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 10px 6px;
+        text-align: center;
+      }
+      .cd-box .cd-num {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fda4af;
+      }
+      .cd-box .cd-label {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.35);
+        margin-top: 2px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .disclaimer {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.2);
+        text-align: center;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
 
-  /* ── Loading / error ── */
-  .loading-msg { text-align:center; color:rgba(255,255,255,0.3); padding:32px 0; font-size:0.9rem; }
-  .error-msg   { text-align:center; color:#fda4af; padding:16px 0; font-size:0.85rem; display:none; }
+      /* ── Loading / error ── */
+      .loading-msg {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.3);
+        padding: 32px 0;
+        font-size: 0.9rem;
+      }
+      .error-msg {
+        text-align: center;
+        color: #fda4af;
+        padding: 16px 0;
+        font-size: 0.85rem;
+        display: none;
+      }
 
-  /* scrollbar */
-  #sidebar ::-webkit-scrollbar { width: 4px; }
-  #sidebar ::-webkit-scrollbar-track { background: transparent; }
-  #sidebar ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-</style>
-</head>
-<body>
+      /* scrollbar */
+      #sidebar ::-webkit-scrollbar {
+        width: 4px;
+      }
+      #sidebar ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #sidebar ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
 
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
-
-<!-- ── Login ── -->
-<div id="login-screen">
-  <div class="login-card">
-    <div class="lock">🔒</div>
-    <h1>Private Dashboard</h1>
-    <p>Sign in with your Google account to continue</p>
-    <div id="g_id_onload"
-         data-client_id="7346060566-39riegeih7sclmbcfenvqg9l2ggn0fnh.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse">
-    </div>
-    <div class="g_id_signin"></div>
-  </div>
-</div>
-
-<!-- ── App ── -->
-<div id="app">
-  <nav>
-    <span class="logo">LOCAMARTIN</span>
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-  </nav>
-
-  <div class="main-content">
-    <div class="welcome-card">
-      <h2>Welcome back 👋</h2>
-      <p>Your private dashboard. Open the menu to access Analytics, Notes, and more.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ── Overlay ── -->
-<div id="overlay" onclick="closeSidebar()"></div>
-
-<!-- ── Sidebar ── -->
-<div id="sidebar">
-  <div class="sidebar-header">
-    <h2>Menu</h2>
-    <button class="close-btn" onclick="closeSidebar()">✕</button>
-  </div>
-
-  <div class="sidebar-nav">
-    <button class="nav-item active" onclick="showPanel('analytics')">
-      <span class="icon">📊</span> Analytics
-    </button>
-    <button class="nav-item" onclick="showPanel('death')">
-      <span class="icon">💀</span> Death Clock
-    </button>
-    <button class="nav-item" onclick="showPanel('notes')">
-      <span class="icon">📝</span> Notes
-    </button>
-  </div>
-
-  <div class="sidebar-body">
-
-    <!-- Analytics panel -->
-    <div class="panel active" id="panel-analytics">
-      <div class="loading-msg" id="loading-msg">Loading analytics…</div>
-      <div class="error-msg"   id="error-msg">Failed to load analytics.</div>
-      <div id="analytics-content" style="display:none">
-        <div class="stat-card">
-          <div class="num" id="total-views">0</div>
-          <div class="label">Total page views (all time)</div>
+    <!-- ── Login ── -->
+    <div id="login-screen">
+      <div class="login-card">
+        <div class="lock">
+          <svg
+            width="80"
+            height="80"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12,11A5,5,0,1,0,7,6,5.006,5.006,0,0,0,12,11Zm0-8A3,3,0,1,1,9,6,3,3,0,0,1,12,3ZM3,22V18a5.006,5.006,0,0,1,5-5h8a5.006,5.006,0,0,1,5,5v4a1,1,0,0,1-2,0V18a3,3,0,0,0-3-3H8a3,3,0,0,0-3,3v4a1,1,0,0,1-2,0Z"
+            />
+          </svg>
         </div>
-        <div class="section-title">Last 7 days</div>
-        <div class="chart-wrap" id="chart"></div>
-        <div class="section-title">Top pages</div>
-        <div id="top-pages"></div>
+        <h1>Private Dashboard</h1>
+        <p>Sign in with your Google account to continue</p>
+        <div
+          id="g_id_onload"
+          data-client_id="7346060566-39riegeih7sclmbcfenvqg9l2ggn0fnh.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse"
+        ></div>
+        <div class="g_id_signin"></div>
       </div>
     </div>
 
-    <!-- Death Clock panel -->
-    <div class="panel" id="panel-death">
-      <p class="death-intro">Enter your details to estimate your life expectancy and see a live countdown.</p>
-      <div class="death-input-row">
-        <label>Date of birth</label>
-        <input type="date" id="dob">
-      </div>
-      <div class="death-input-row">
-        <label>Biological sex</label>
-        <select id="sex">
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
-      </div>
-      <div class="death-input-row">
-        <label>Lifestyle</label>
-        <select id="lifestyle">
-          <option value="healthy">Healthy (exercise, no smoking)</option>
-          <option value="average" selected>Average</option>
-          <option value="unhealthy">Unhealthy (smoking, sedentary)</option>
-        </select>
-      </div>
-      <button class="calc-btn" onclick="calcDeath()">Calculate</button>
-      <div class="death-result" id="death-result">
-        <div class="est-date" id="death-date"></div>
-        <div class="years-left" id="years-left"></div>
-        <div class="countdown" id="countdown"></div>
-        <div class="disclaimer">⚠️ This is a statistical estimate for fun only, not medical advice.</div>
+    <!-- ── App ── -->
+    <div id="app">
+      <nav>
+        <span class="logo">LOCAMARTIN</span>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      </nav>
+
+      <div class="main-content">
+        <div class="welcome-card">
+          <h2>Welcome back 👋</h2>
+          <p>
+            Your private dashboard. Open the menu to access Analytics, Notes,
+            and more.
+          </p>
+        </div>
       </div>
     </div>
 
-    <!-- Notes panel -->
-    <div class="panel" id="panel-notes">
-      <div class="section-title">Private notes</div>
-      <textarea class="notes-area" id="notes-area" placeholder="Write anything here… saved in your browser."></textarea>
-      <button class="save-btn" onclick="saveNotes()">Save notes</button>
-      <div class="save-confirm" id="save-confirm"></div>
+    <!-- ── Overlay ── -->
+    <div id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- ── Sidebar ── -->
+    <div id="sidebar">
+      <div class="sidebar-header">
+        <h2>Menu</h2>
+        <button class="close-btn" onclick="closeSidebar()">✕</button>
+      </div>
+
+      <div class="sidebar-nav">
+        <button class="nav-item active" onclick="showPanel('analytics')">
+          <span class="icon">📊</span> Analytics
+        </button>
+        <button class="nav-item" onclick="showPanel('death')">
+          <span class="icon">💀</span> Death Clock
+        </button>
+        <button class="nav-item" onclick="showPanel('notes')">
+          <span class="icon">📝</span> Notes
+        </button>
+      </div>
+
+      <div class="sidebar-body">
+        <!-- Analytics panel -->
+        <div class="panel active" id="panel-analytics">
+          <div class="loading-msg" id="loading-msg">Loading analytics…</div>
+          <div class="error-msg" id="error-msg">Failed to load analytics.</div>
+          <div id="analytics-content" style="display: none">
+            <div class="stat-card">
+              <div class="num" id="total-views">0</div>
+              <div class="label">Total page views (all time)</div>
+            </div>
+            <div class="section-title">Last 7 days</div>
+            <div class="chart-wrap" id="chart"></div>
+            <div class="section-title">Top pages</div>
+            <div id="top-pages"></div>
+          </div>
+        </div>
+
+        <!-- Death Clock panel -->
+        <div class="panel" id="panel-death">
+          <p class="death-intro">
+            Enter your details to estimate your life expectancy and see a live
+            countdown.
+          </p>
+          <div class="death-input-row">
+            <label>Date of birth</label>
+            <input type="date" id="dob" />
+          </div>
+          <div class="death-input-row">
+            <label>Biological sex</label>
+            <select id="sex">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+          <div class="death-input-row">
+            <label>Lifestyle</label>
+            <select id="lifestyle">
+              <option value="healthy">Healthy (exercise, no smoking)</option>
+              <option value="average" selected>Average</option>
+              <option value="unhealthy">Unhealthy (smoking, sedentary)</option>
+            </select>
+          </div>
+          <button class="calc-btn" onclick="calcDeath()">Calculate</button>
+          <div class="death-result" id="death-result">
+            <div class="est-date" id="death-date"></div>
+            <div class="years-left" id="years-left"></div>
+            <div class="countdown" id="countdown"></div>
+            <div class="disclaimer">
+              ⚠️ This is a statistical estimate for fun only, not medical
+              advice.
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes panel -->
+        <div class="panel" id="panel-notes">
+          <div class="section-title">Private notes</div>
+          <textarea
+            class="notes-area"
+            id="notes-area"
+            placeholder="Write anything here… saved in your browser."
+          ></textarea>
+          <button class="save-btn" onclick="saveNotes()">Save notes</button>
+          <div class="save-confirm" id="save-confirm"></div>
+        </div>
+      </div>
     </div>
 
-  </div>
-</div>
+    <script>
+      const WORKER = "https://locamartin-auth.locamartin.workers.dev";
+      let sidebarOpen = false;
+      let analyticsLoaded = false;
+      let deathTimer = null;
 
-<script>
-const WORKER = "https://locamartin-auth.locamartin.workers.dev";
-let sidebarOpen = false;
-let analyticsLoaded = false;
-let deathTimer = null;
+      // ── Google login ──
+      async function handleCredentialResponse(response) {
+        const res = await fetch(WORKER, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: response.credential }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById("login-screen").style.display = "none";
+          document.getElementById("app").style.display = "block";
+          trackPage();
+          loadNotes();
+        } else {
+          alert("Access denied.");
+        }
+      }
 
-// ── Google login ──
-async function handleCredentialResponse(response) {
-  const res = await fetch(WORKER, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: response.credential })
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    trackPage();
-    loadNotes();
-  } else {
-    alert("Access denied.");
-  }
-}
+      function trackPage() {
+        fetch(WORKER + "/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page: "/dashboard" }),
+        }).catch(() => {});
+      }
 
-function trackPage() {
-  fetch(WORKER + "/track", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ page: "/dashboard" })
-  }).catch(() => {});
-}
+      // ── Sidebar ──
+      function toggleSidebar() {
+        sidebarOpen ? closeSidebar() : openSidebar();
+      }
+      function openSidebar() {
+        sidebarOpen = true;
+        document.getElementById("overlay").classList.add("open");
+        document.getElementById("sidebar").classList.add("open");
+        if (!analyticsLoaded) {
+          loadAnalytics();
+          analyticsLoaded = true;
+        }
+      }
+      function closeSidebar() {
+        sidebarOpen = false;
+        document.getElementById("overlay").classList.remove("open");
+        document.getElementById("sidebar").classList.remove("open");
+      }
 
-// ── Sidebar ──
-function toggleSidebar() {
-  sidebarOpen ? closeSidebar() : openSidebar();
-}
-function openSidebar() {
-  sidebarOpen = true;
-  document.getElementById("overlay").classList.add("open");
-  document.getElementById("sidebar").classList.add("open");
-  if (!analyticsLoaded) { loadAnalytics(); analyticsLoaded = true; }
-}
-function closeSidebar() {
-  sidebarOpen = false;
-  document.getElementById("overlay").classList.remove("open");
-  document.getElementById("sidebar").classList.remove("open");
-}
+      // ── Panel switching ──
+      function showPanel(name) {
+        document
+          .querySelectorAll(".panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("panel-" + name).classList.add("active");
+        event.currentTarget.classList.add("active");
+        if (name === "analytics" && !analyticsLoaded) {
+          loadAnalytics();
+          analyticsLoaded = true;
+        }
+      }
 
-// ── Panel switching ──
-function showPanel(name) {
-  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-  document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
-  document.getElementById("panel-" + name).classList.add("active");
-  event.currentTarget.classList.add("active");
-  if (name === "analytics" && !analyticsLoaded) { loadAnalytics(); analyticsLoaded = true; }
-}
+      // ── Analytics ──
+      async function loadAnalytics() {
+        document.getElementById("loading-msg").style.display = "block";
+        document.getElementById("analytics-content").style.display = "none";
+        document.getElementById("error-msg").style.display = "none";
+        try {
+          const res = await fetch(WORKER + "/stats");
+          const data = await res.json();
+          document.getElementById("total-views").textContent = data.total || 0;
 
-// ── Analytics ──
-async function loadAnalytics() {
-  document.getElementById("loading-msg").style.display = "block";
-  document.getElementById("analytics-content").style.display = "none";
-  document.getElementById("error-msg").style.display = "none";
-  try {
-    const res = await fetch(WORKER + "/stats");
-    const data = await res.json();
-    document.getElementById("total-views").textContent = data.total || 0;
-
-    const chart = document.getElementById("chart");
-    chart.innerHTML = "";
-    const days = data.days || {};
-    const vals = Object.values(days);
-    const maxVal = Math.max(...vals, 1);
-    Object.entries(days).forEach(([date, count]) => {
-      const h = Math.max(Math.round((count / maxVal) * 62), count > 0 ? 4 : 2);
-      chart.innerHTML += `<div class="bar-col">
+          const chart = document.getElementById("chart");
+          chart.innerHTML = "";
+          const days = data.days || {};
+          const vals = Object.values(days);
+          const maxVal = Math.max(...vals, 1);
+          Object.entries(days).forEach(([date, count]) => {
+            const h = Math.max(
+              Math.round((count / maxVal) * 62),
+              count > 0 ? 4 : 2,
+            );
+            chart.innerHTML += `<div class="bar-col">
         <div class="bar" style="height:${h}px" title="${count} views"></div>
         <div class="bar-label">${date.slice(5)}</div>
       </div>`;
-    });
+          });
 
-    const pagesDiv = document.getElementById("top-pages");
-    pagesDiv.innerHTML = "";
-    const sorted = Object.entries(data.topPages || {}).sort((a,b) => b[1]-a[1]);
-    if (!sorted.length) {
-      pagesDiv.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:0.85rem">No data yet.</p>';
-    } else {
-      sorted.forEach(([page, count]) => {
-        pagesDiv.innerHTML += `<div class="page-row">
+          const pagesDiv = document.getElementById("top-pages");
+          pagesDiv.innerHTML = "";
+          const sorted = Object.entries(data.topPages || {}).sort(
+            (a, b) => b[1] - a[1],
+          );
+          if (!sorted.length) {
+            pagesDiv.innerHTML =
+              '<p style="color:rgba(255,255,255,0.3);font-size:0.85rem">No data yet.</p>';
+          } else {
+            sorted.forEach(([page, count]) => {
+              pagesDiv.innerHTML += `<div class="page-row">
           <span class="page-name">${page}</span>
           <span class="page-count">${count}</span>
         </div>`;
-      });
-    }
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("analytics-content").style.display = "block";
-  } catch(e) {
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("error-msg").style.display = "block";
-  }
-}
+            });
+          }
+          document.getElementById("loading-msg").style.display = "none";
+          document.getElementById("analytics-content").style.display = "block";
+        } catch (e) {
+          document.getElementById("loading-msg").style.display = "none";
+          document.getElementById("error-msg").style.display = "block";
+        }
+      }
 
-// ── Death clock ──
-function calcDeath() {
-  const dob = document.getElementById("dob").value;
-  const sex = document.getElementById("sex").value;
-  const lifestyle = document.getElementById("lifestyle").value;
-  if (!dob) { alert("Please enter your date of birth."); return; }
+      // ── Death clock ──
+      function calcDeath() {
+        const dob = document.getElementById("dob").value;
+        const sex = document.getElementById("sex").value;
+        const lifestyle = document.getElementById("lifestyle").value;
+        if (!dob) {
+          alert("Please enter your date of birth.");
+          return;
+        }
 
-  const baseLife = { male: 74, female: 80 };
-  const lifestyleAdj = { healthy: 5, average: 0, unhealthy: -8 };
-  const expectancy = baseLife[sex] + lifestyleAdj[lifestyle];
+        const baseLife = { male: 74, female: 80 };
+        const lifestyleAdj = { healthy: 5, average: 0, unhealthy: -8 };
+        const expectancy = baseLife[sex] + lifestyleAdj[lifestyle];
 
-  const birth = new Date(dob);
-  const deathDate = new Date(birth);
-  deathDate.setFullYear(birth.getFullYear() + expectancy);
+        const birth = new Date(dob);
+        const deathDate = new Date(birth);
+        deathDate.setFullYear(birth.getFullYear() + expectancy);
 
-  const now = new Date();
-  const msLeft = deathDate - now;
+        const now = new Date();
+        const msLeft = deathDate - now;
 
-  if (msLeft <= 0) {
-    document.getElementById("death-date").textContent = "Date has passed";
-    document.getElementById("years-left").textContent = "";
-    document.getElementById("countdown").innerHTML = "";
-  } else {
-    const yearsLeft = (msLeft / (1000*60*60*24*365.25)).toFixed(1);
-    document.getElementById("death-date").textContent = deathDate.toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
-    document.getElementById("years-left").textContent = `~${yearsLeft} years remaining`;
-    if (deathTimer) clearInterval(deathTimer);
-    updateCountdown(deathDate);
-    deathTimer = setInterval(() => updateCountdown(deathDate), 1000);
-  }
+        if (msLeft <= 0) {
+          document.getElementById("death-date").textContent = "Date has passed";
+          document.getElementById("years-left").textContent = "";
+          document.getElementById("countdown").innerHTML = "";
+        } else {
+          const yearsLeft = (msLeft / (1000 * 60 * 60 * 24 * 365.25)).toFixed(
+            1,
+          );
+          document.getElementById("death-date").textContent =
+            deathDate.toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+          document.getElementById("years-left").textContent =
+            `~${yearsLeft} years remaining`;
+          if (deathTimer) clearInterval(deathTimer);
+          updateCountdown(deathDate);
+          deathTimer = setInterval(() => updateCountdown(deathDate), 1000);
+        }
 
-  document.getElementById("death-result").style.display = "block";
-}
+        document.getElementById("death-result").style.display = "block";
+      }
 
-function updateCountdown(target) {
-  const diff = target - new Date();
-  if (diff <= 0) { clearInterval(deathTimer); return; }
-  const days  = Math.floor(diff / (1000*60*60*24));
-  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
-  const mins  = Math.floor((diff % (1000*60*60)) / (1000*60));
-  const secs  = Math.floor((diff % (1000*60)) / 1000);
-  document.getElementById("countdown").innerHTML = `
+      function updateCountdown(target) {
+        const diff = target - new Date();
+        if (diff <= 0) {
+          clearInterval(deathTimer);
+          return;
+        }
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+          (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        );
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        document.getElementById("countdown").innerHTML = `
     <div class="cd-box"><div class="cd-num">${days.toLocaleString()}</div><div class="cd-label">Days</div></div>
     <div class="cd-box"><div class="cd-num">${hours}</div><div class="cd-label">Hours</div></div>
     <div class="cd-box"><div class="cd-num">${mins}</div><div class="cd-label">Mins</div></div>
     <div class="cd-box"><div class="cd-num">${secs}</div><div class="cd-label">Secs</div></div>`;
-}
+      }
 
-// ── Notes (localStorage) ──
-function loadNotes() {
-  document.getElementById("notes-area").value = localStorage.getItem("lm_notes") || "";
-}
-function saveNotes() {
-  localStorage.setItem("lm_notes", document.getElementById("notes-area").value);
-  const c = document.getElementById("save-confirm");
-  c.textContent = "✓ Saved";
-  setTimeout(() => c.textContent = "", 2000);
-}
-</script>
-
-</body>
+      // ── Notes (localStorage) ──
+      function loadNotes() {
+        document.getElementById("notes-area").value =
+          localStorage.getItem("lm_notes") || "";
+      }
+      function saveNotes() {
+        localStorage.setItem(
+          "lm_notes",
+          document.getElementById("notes-area").value,
+        );
+        const c = document.getElementById("save-confirm");
+        c.textContent = "✓ Saved";
+        setTimeout(() => (c.textContent = ""), 2000);
+      }
+    </script>
+  </body>
 </html>
