@@ -1,154 +1,68 @@
-=<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Redirecting...</title>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self';">
+<meta charset="utf-8">
+<title>Private Dashboard</title>
 
-  <!-- Load local Digital-7 font -->
-  <style>
-    @font-face {
-      font-family: 'Digital-7';
-      src: url('./digital-7.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
-  </style>
+<script src="https://accounts.google.com/gsi/client"
+async defer></script>
 
-  <style>
-    body {
-      background-color: black;
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Share Tech Mono', monospace;
-      overflow: hidden;
-    }
-
-    .container {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-
-    .progress-wrapper {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-
-    .redirecting-label {
-      position: absolute;
-      top: -30px;
-      left: 10px;
-      font-size: 28px;
-      color: cyan;
-      font-style: italic;
-      font-weight: bold;
-    }
-
-    .progress-bar {
-      display: flex;
-      transform: skewX(-15deg);
-      padding: 4px;
-      border-radius: 5px;
-      background-color: black;
-      border: 3px solid cyan;
-    }
-
-    .segment {
-      width: 20px;
-      height: 40px;
-      margin-right: 2px;
-      background-color: black;
-      border: 2px solid cyan;
-    }
-
-    .segment.filled {
-      background-color: rgb(0, 119, 255);
-    }
-
-    .segment-inner {
-      transform: skewX(15deg);
-      width: 100%;
-      height: 100%;
-    }
-
-    .percentage {
-      font-family: 'Digital-7', monospace;
-      font-size: 28px;
-      color: cyan;
-      margin-left: 15px;
-      letter-spacing: 2px;
-    }
-
-    .fade-screen {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 1s ease-in-out;
-      z-index: 10;
-    }
-
-    .fade-screen.visible {
-      opacity: 1;
-    }
-  </style>
+<style>
+body{
+  font-family:sans-serif;
+  text-align:center;
+  margin-top:100px;
+}
+</style>
 </head>
 <body>
 
-<div class="container">
-  <div class="progress-wrapper">
-    <div class="redirecting-label">REDIRECTING</div>
+<h1>Private Dashboard</h1>
 
-    <div class="progress-bar" id="progressBar">
-      <!-- Segments will be filled by JS -->
-    </div>
-
-    <div class="percentage" id="percentageText">0%</div>
-  </div>
+<div id="status">
+Please sign in
 </div>
 
-<div class="fade-screen" id="fadeScreen"></div>
+<div id="g_id_onload"
+     data-client_id="YOUR_CLIENT_ID"
+     data-callback="handleCredentialResponse">
+</div>
+
+<div class="g_id_signin"></div>
 
 <script>
-(function() {
-  const totalSegments = 20;
-  const bar = document.getElementById('progressBar');
-  const percentageText = document.getElementById('percentageText');
-  const fadeScreen = document.getElementById('fadeScreen');
-  const redirectURL = "https://github.com/LocaMartin";
 
-  // Generate segments
-  for (let i = 0; i < totalSegments; i++) {
-    const segment = document.createElement('div');
-    segment.classList.add('segment');
-    segment.innerHTML = '<div class="segment-inner"></div>';
-    bar.appendChild(segment);
-  }
+async function handleCredentialResponse(response){
 
-  let filled = 0;
-  const interval = setInterval(() => {
-    if (filled < totalSegments) {
-      bar.children[filled].classList.add('filled');
-      filled++;
-      percentageText.textContent = Math.round((filled / totalSegments) * 100) + '%';
-    } else {
-      clearInterval(interval);
-      fadeScreen.classList.add('visible');
-      setTimeout(() => {
-        window.location.href = redirectURL;
-      }, 1000);
+    const res = await fetch(
+      "https://locamartin-auth.locamartin.workers.dev",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          token: response.credential
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if(data.success){
+
+        document.body.innerHTML = `
+        <h1>Welcome</h1>
+        <p>${data.email}</p>
+        <p>Authentication successful.</p>
+        `;
+
+    }else{
+
+        alert("Access denied");
+
     }
-  }, 200);
-})();
+}
 </script>
 
 </body>
