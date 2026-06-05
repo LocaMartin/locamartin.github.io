@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Private Dashboard</title>
+
+<script src="https://accounts.google.com/gsi/client"
+async defer></script>
+
+<style>
+body{
+  font-family:sans-serif;
+  text-align:center;
+  margin-top:100px;
+}
+</style>
+</head>
+<body>
+
+<h1>Private Dashboard</h1>
+
+<div id="status">
+Please sign in
+</div>
+
+<div id="g_id_onload"
+     data-client_id="7346060566-39riegeih7sclmbcfenvqg9l2ggn0fnh.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse">
+</div>
+
+<div class="g_id_signin"></div>
+
+<script>
+
+async function handleCredentialResponse(response){
+
+    const res = await fetch(
+      "https://locamartin-auth.locamartin.workers.dev",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          token: response.credential
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if(data.success){
+
+        document.body.innerHTML = `
+        <h1>Welcome</h1>
+        <p>${data.email}</p>
+        <p>Authentication successful.</p>
+        `;
+
+    }else{
+
+        alert("Access denied");
+
+    }
+}
+</script>
+
+</body>
+</html>
