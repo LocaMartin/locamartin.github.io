@@ -398,7 +398,7 @@
         height: 16px;
       }
 
-      /* ── Death clock panel ── */
+      /* ── Death  panel ── */
       .death-intro {
         font-size: 0.82rem;
         color: rgba(255, 255, 255, 0.4);
@@ -588,17 +588,57 @@
         <button class="close-btn" onclick="closeSidebar()">✕</button>
       </div>
 
-      <div class="sidebar-nav">
-        <button class="nav-item active" onclick="showPanel('analytics')">
-          <span class="icon">📊</span> Analytics
-        </button>
-        <button class="nav-item" onclick="showPanel('death')">
-          <span class="icon">💀</span> Death Clock
-        </button>
-        <button class="nav-item" onclick="showPanel('notes')">
-          <span class="icon">📝</span> Notes
-        </button>
-      </div>
+<div class="sidebar-nav">
+
+  <button class="nav-item active" onclick="showPanel('analytics')">
+    <span class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" width="20" height="20">
+        <path d="M4 19L7.75 11.5C7.87 11.26 8.06 11.09 8.3 11
+                 C9.11 10.7 9.6 10.8 9.76 11.29L11.12 15.36
+                 C11.2 15.6 11.37 15.8 11.59 15.92
+                 C12.35 16.33 12.85 16.3 13.08 15.84L18 6"/>
+        <path d="M13 6.46L17.28 5.32C17.43 5.28 17.6 5.27 17.76 5.31
+                 C18.32 5.44 18.64 5.66 18.72 5.97L19.93 10.46"/>
+      </svg>
+    </span>
+    Analytics
+  </button>
+
+  <button class="nav-item" onclick="showPanel('death')">
+    <span class="icon">
+      <svg viewBox="0 0 237.933 237.933" fill="currentColor"
+           width="20" height="20">
+        <path d="M233.158,23.945c-0.144-0.248-3.922-7.695-24.301-15.826C195.925,2.959,181.005,0,167.922,0
+        c-13.595,0-24.628,3.053-32.796,9.072c-1.143,0.844-1.623,1.859-1.315,2.789
+        c0.477,1.449,2.319,1.449,2.926,1.449c0.118,0,0.245-0.002,0.378-0.006
+        c1.11-0.037,2.239-0.057,3.348-0.055c31.895,0.039,49.403,5.83,66.054,25.463
+        l-39.881,68.203c-16.648-29.959-51.969-17.672-38.25-65.771
+        c2.269-7.957,1.705-28.121-16.678-32.4c-0.096-0.027-1.904-0.365-2.004-0.373
+        C91.617,4.998,83.844,25.133,82.545,33.303c-7.699,48.462-41.898,18.091-70.254,56.155
+        c-28.354,38.065,27.8,26.836,32.494,79.108c2.029,34.263-6.596,37.842-10.865,54.029
+        c-8.533,32.357,51.989,11.143,78.871-41.395c6.959-14.154,16.193-21.283,25.363-25.576
+        l-27.277,46.648c-0.18,0.229-0.287,0.518-0.287,0.829c0,0.744,0.604,1.349,1.348,1.349
+        h13.355c0.447,0,0.865-0.224,1.116-0.594c2.558-3.787,16.147-28.49,30.687-54.695
+        c11.988-3.633,19.837-7.73,15.177-27.225c9.928-17.687,18.552-32.698,22.246-38.06
+        c7.65-11.102,14.258-20.689,16.608-24.162c6.844-10.105,22.119-33.791,22.271-34.029
+        C233.767,25.128,233.594,24.704,233.158,23.945z"/>
+      </svg>
+    </span>
+    Death
+  </button>
+
+  <button class="nav-item" onclick="showPanel('notes')">
+    <span class="icon">
+      <svg viewBox="0 0 1024 1024" fill="currentColor"
+           width="20" height="20">
+        <path d="M799.344 960.288h-736v-800h449.6l64.704-62.336-1.664-1.664H63.344c-35.344 0-64 28.656-64 64v800c0 35.344 28.656 64 64 64h736c35.344 0 64-28.656 64-64V491.632l-64 61.088v407.568zM974.224 41.44C945.344 13.76 913.473-.273 879.473-.273c-53.216 0-92.032 34.368-102.592 44.897-14.976 14.784-439.168 438.353-439.168 438.353-3.328 3.391-5.76 7.535-7.008 12.143-11.488 42.448-69.072 230.992-69.648 232.864-2.976 9.664-.32 20.193 6.8 27.217a26.641 26.641 0 0 0 18.913 7.84c2.752 0 5.52-.4 8.239-1.248 1.952-.656 196.496-63.569 228.512-73.12 4.224-1.248 8.048-3.536 11.216-6.624 20.208-19.936 410.112-403.792 441.664-436.384 32.624-33.664 48.847-68.657 48.223-104.097-.591-35.008-17.616-68.704-50.4-100.128z"/>
+      </svg>
+    </span>
+    Notes
+  </button>
+
+</div>
 
       <div class="sidebar-body">
         <!-- Analytics panel -->
@@ -617,7 +657,7 @@
           </div>
         </div>
 
-        <!-- Death Clock panel -->
+        <!-- Death panel -->
         <div class="panel" id="panel-death">
           <p class="death-intro">
             Enter your details to estimate your life expectancy and see a live
@@ -785,7 +825,7 @@
         }
       }
 
-      // ── Death clock ──
+      // ── Death ──
       function calcDeath() {
         const dob = document.getElementById("dob").value;
         const sex = document.getElementById("sex").value;
