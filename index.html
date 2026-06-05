@@ -1,3 +1,4 @@
+<!-- LocaMartin landing page "index.html"-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,12 +6,23 @@
 </head>
 <body>
   <h1>Welcome to LocaMartin</h1>
-<!-- Cloudflare Web Analytics -->
- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
-<!-- End Cloudflare Web Analytics -->
 
   <p>This is the public homepage.</p>
 
   <a href="/dashboard/">Dashboard Login</a>
+
+<!-- Cloudflare Web Analytics -->
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
+<!-- End Cloudflare Web Analytics -->
+
+<!-- Custom Analytics Tracker -->
+<script>
+  fetch("https://locamartin-auth.locamartin.workers.dev/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ page: "/" })
+  }).catch(() => {});
+</script>
+
 </body>
 </html>

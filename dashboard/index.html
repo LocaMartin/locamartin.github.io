@@ -1,70 +1,341 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Private Dashboard</title>
-<!-- Cloudflare Web Analytics -->
- <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'>
-</script>
-<!-- End Cloudflare Web Analytics -->
-<script src="https://accounts.google.com/gsi/client"
-async defer></script>
-
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-body{
-  font-family:sans-serif;
-  text-align:center;
-  margin-top:100px;
-}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+  }
+
+  /* ── Login screen ── */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    gap: 16px;
+  }
+  #login-screen h1 { font-size: 1.6rem; color: #333; }
+  #login-screen p  { color: #777; font-size: 0.95rem; }
+
+  /* ── Main layout ── */
+  #app { display: none; }
+
+  nav {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  nav .logo { font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; }
+  nav .nav-right { display: flex; align-items: center; gap: 16px; }
+  nav .email { font-size: 0.85rem; color: #aaa; }
+
+  .analytics-btn {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .analytics-btn:hover { background: #4338ca; }
+
+  .main-content {
+    padding: 40px 32px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .main-content h2 { font-size: 1.4rem; color: #333; margin-bottom: 8px; }
+  .main-content p  { color: #777; }
+
+  /* ── Sidebar overlay ── */
+  #overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+  }
+  #overlay.open { display: block; }
+
+  #sidebar {
+    position: fixed;
+    top: 0; right: -420px;
+    width: 420px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+    z-index: 101;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    padding: 0;
+  }
+  #sidebar.open { right: 0; }
+
+  .sidebar-header {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-header h2 { font-size: 1.1rem; }
+  .close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .sidebar-body { padding: 24px; }
+
+  .stat-card {
+    background: #f0f0ff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .stat-card .num { font-size: 2.4rem; font-weight: 700; color: #4f46e5; }
+  .stat-card .label { color: #777; font-size: 0.9rem; margin-top: 4px; }
+
+  .section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 20px 0 10px;
+  }
+
+  .page-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: #fafafa;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+  }
+  .page-row .page-name { color: #333; font-family: monospace; }
+  .page-row .page-count {
+    background: #4f46e5;
+    color: #fff;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* ── 7-day bar chart ── */
+  .chart-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 80px;
+    margin-top: 8px;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar {
+    width: 100%;
+    background: #4f46e5;
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    transition: height 0.4s ease;
+  }
+  .bar-label { font-size: 0.68rem; color: #999; }
+
+  #loading-msg {
+    text-align: center;
+    color: #999;
+    padding: 40px 0;
+    font-size: 0.95rem;
+  }
+  #error-msg {
+    text-align: center;
+    color: #e53e3e;
+    padding: 20px 0;
+    font-size: 0.9rem;
+    display: none;
+  }
 </style>
 </head>
 <body>
 
-<h1>Private Dashboard</h1>
-
-<div id="status">
-Please sign in
+<!-- ── Login screen ── -->
+<div id="login-screen">
+  <h1>🔒 Private Dashboard</h1>
+  <p>Sign in with your Google account to continue</p>
+  <div id="g_id_onload"
+       data-client_id="7346060566-39riegeih7sclmbcfenvqg9l2ggn0fnh.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse">
+  </div>
+  <div class="g_id_signin"></div>
 </div>
 
-<div id="g_id_onload"
-     data-client_id="7346060566-39riegeih7sclmbcfenvqg9l2ggn0fnh.apps.googleusercontent.com"
-     data-callback="handleCredentialResponse">
+<!-- ── Main app (shown after login) ── -->
+<div id="app">
+  <nav>
+    <span class="logo">LocaMartin</span>
+    <div class="nav-right">
+      <span class="email" id="user-email"></span>
+      <button class="analytics-btn" onclick="openAnalytics()">
+        📊 Analytics
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <h2>Welcome back 👋</h2>
+    <p>Your private dashboard. Click <strong>Analytics</strong> in the top right to view site stats.</p>
+  </div>
 </div>
 
-<div class="g_id_signin"></div>
+<!-- ── Sidebar overlay ── -->
+<div id="overlay" onclick="closeAnalytics()"></div>
+
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h2>📊 Analytics</h2>
+    <button class="close-btn" onclick="closeAnalytics()">✕</button>
+  </div>
+  <div class="sidebar-body">
+    <div id="loading-msg">Loading analytics…</div>
+    <div id="error-msg">Failed to load analytics.</div>
+    <div id="analytics-content" style="display:none">
+      <div class="stat-card">
+        <div class="num" id="total-views">0</div>
+        <div class="label">Total page views (all time)</div>
+      </div>
+
+      <div class="section-title">Last 7 days</div>
+      <div class="chart-wrap" id="chart"></div>
+
+      <div class="section-title">Top pages</div>
+      <div id="top-pages"></div>
+    </div>
+  </div>
+</div>
 
 <script>
+const WORKER = "https://locamartin-auth.locamartin.workers.dev";
 
-async function handleCredentialResponse(response){
+async function handleCredentialResponse(response) {
+  const res = await fetch(WORKER, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: response.credential })
+  });
+  const data = await res.json();
+  if (data.success) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("user-email").textContent = data.email;
+    trackPage();
+  } else {
+    alert("Access denied. This dashboard is private.");
+  }
+}
 
-    const res = await fetch(
-      "https://locamartin-auth.locamartin.workers.dev",
-      {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          token: response.credential
-        })
-      }
-    );
+function trackPage() {
+  fetch(WORKER + "/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ page: "/dashboard" })
+  }).catch(() => {});
+}
 
+function openAnalytics() {
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("sidebar").classList.add("open");
+  loadAnalytics();
+}
+
+function closeAnalytics() {
+  document.getElementById("overlay").classList.remove("open");
+  document.getElementById("sidebar").classList.remove("open");
+}
+
+async function loadAnalytics() {
+  document.getElementById("loading-msg").style.display = "block";
+  document.getElementById("analytics-content").style.display = "none";
+  document.getElementById("error-msg").style.display = "none";
+
+  try {
+    const res = await fetch(WORKER + "/stats");
     const data = await res.json();
 
-    if(data.success){
+    document.getElementById("total-views").textContent = data.total || 0;
 
-        document.body.innerHTML = `
-        <h1>Welcome</h1>
-        <p>${data.email}</p>
-        <p>Authentication successful.</p>
-        `;
+    // 7-day chart
+    const chart = document.getElementById("chart");
+    chart.innerHTML = "";
+    const days = data.days || {};
+    const vals = Object.values(days);
+    const maxVal = Math.max(...vals, 1);
+    Object.entries(days).forEach(([date, count]) => {
+      const pct = Math.round((count / maxVal) * 72);
+      const label = date.slice(5); // "06-05"
+      chart.innerHTML += `
+        <div class="bar-col">
+          <div class="bar" style="height:${pct}px" title="${count} views"></div>
+          <div class="bar-label">${label}</div>
+        </div>`;
+    });
 
-    }else{
-
-        alert("Access denied");
-
+    // top pages
+    const pagesDiv = document.getElementById("top-pages");
+    pagesDiv.innerHTML = "";
+    const sorted = Object.entries(data.topPages || {})
+      .sort((a, b) => b[1] - a[1]);
+    if (sorted.length === 0) {
+      pagesDiv.innerHTML = '<p style="color:#aaa;font-size:0.9rem">No page data yet.</p>';
+    } else {
+      sorted.forEach(([page, count]) => {
+        pagesDiv.innerHTML += `
+          <div class="page-row">
+            <span class="page-name">${page}</span>
+            <span class="page-count">${count}</span>
+          </div>`;
+      });
     }
+
+    document.getElementById("loading-msg").style.display = "none";
+    document.getElementById("analytics-content").style.display = "block";
+
+  } catch (e) {
+    document.getElementById("loading-msg").style.display = "none";
+    document.getElementById("error-msg").style.display = "block";
+  }
 }
 </script>
 
