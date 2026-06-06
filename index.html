@@ -1,21 +1,661 @@
-<!-- LocaMartin landing page "index.html"-->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>LocaMartin</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lokanath Pradhan</title>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.15);
+    --purple-border: rgba(167,139,250,0.25);
+    --blue: #60a5fa;
+    --glass: rgba(255,255,255,0.07);
+    --glass-border: rgba(255,255,255,0.12);
+    --text: rgba(255,255,255,0.88);
+    --muted: rgba(255,255,255,0.45);
+    --green: #6ee7b7;
+    --pink: #f9a8d4;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb1 { width: 600px; height: 600px; background: #6c63ff; top: -150px; left: -150px; }
+  .orb2 { width: 450px; height: 450px; background: #ff6584; bottom: -100px; right: -100px; }
+  .orb3 { width: 350px; height: 350px; background: #43e8d8; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,12,41,0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, var(--purple), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .nav-logo:hover { opacity: 0.8; }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  main {
+    position: relative;
+    z-index: 10;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  .card {
+    background: var(--glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 36px 32px;
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .hero { display: flex; flex-direction: column; gap: 16px; }
+  .hero-name {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    background: linear-gradient(90deg, #fff 30%, var(--purple), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-title { font-size: 1rem; color: var(--purple); letter-spacing: 1px; font-weight: 500; }
+  .hero-summary { font-size: 0.95rem; color: var(--muted); line-height: 1.75; max-width: 720px; margin-top: 4px; }
+  .hero-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    background: var(--purple-dim);
+    border: 1px solid var(--purple-border);
+    border-radius: 50px;
+    color: #c4b5fd;
+    text-decoration: none;
+    font-size: 0.83rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .hero-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .hero-link:hover { background: rgba(167,139,250,0.28); border-color: rgba(167,139,250,0.5); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { padding: 4px 12px; border-radius: 50px; font-size: 0.78rem; font-weight: 500; }
+  .tag-purple { background: var(--purple-dim); border: 1px solid var(--purple-border); color: #c4b5fd; }
+  .tag-blue   { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25); color: #93c5fd; }
+  .tag-green  { background: rgba(110,231,183,0.1); border: 1px solid rgba(110,231,183,0.2); color: #6ee7b7; }
+  .tag-pink   { background: rgba(249,168,212,0.1); border: 1px solid rgba(249,168,212,0.2); color: #f9a8d4; }
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .skill-group h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+
+  .exp-item { margin-bottom: 32px; }
+  .exp-item:last-child { margin-bottom: 0; }
+  .exp-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .exp-role { font-size: 1rem; font-weight: 600; color: var(--text); }
+  .exp-where { font-size: 0.83rem; color: var(--purple); margin-bottom: 2px; }
+  .exp-date { font-size: 0.75rem; color: var(--muted); background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .exp-bullets { list-style: none; padding: 0; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .exp-bullets li { font-size: 0.87rem; color: var(--muted); line-height: 1.6; padding-left: 16px; position: relative; }
+  .exp-bullets li::before { content: "▸"; position: absolute; left: 0; color: var(--purple); font-size: 0.7rem; top: 3px; }
+  .exp-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 24px 0; }
+
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .project-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 14px;
+    padding: 20px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .project-card:hover { border-color: var(--purple-border); background: var(--purple-dim); }
+  .project-name { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+  .project-name svg { width: 15px; height: 15px; color: var(--purple); flex-shrink: 0; }
+  .project-name a { color: inherit; text-decoration: none; }
+  .project-name a:hover { color: var(--purple); }
+  .project-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+
+  .cert-list { display: flex; flex-direction: column; gap: 10px; }
+  .cert-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
+  .cert-left { display: flex; align-items: center; gap: 10px; }
+  .cert-left svg { width: 16px; height: 16px; color: var(--purple); flex-shrink: 0; }
+  .cert-name { font-size: 0.87rem; color: var(--text); font-weight: 500; }
+  .cert-issuer { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .cert-date { font-size: 0.72rem; color: var(--purple); background: var(--purple-dim); padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
+
+  .edu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .edu-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; }
+  .edu-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .edu-card-header svg { width: 16px; height: 16px; color: var(--purple); flex-shrink: 0; }
+  .edu-degree { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+  .edu-inst   { font-size: 0.8rem; color: var(--purple); margin-bottom: 4px; }
+  .edu-meta   { font-size: 0.75rem; color: var(--muted); }
+
+  .ctf-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .ctf-stat { background: rgba(110,231,183,0.08); border: 1px solid rgba(110,231,183,0.18); border-radius: 10px; padding: 10px 18px; text-align: center; }
+  .ctf-stat .num { font-size: 1.3rem; font-weight: 700; color: var(--green); }
+  .ctf-stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  .proof-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(96,165,250,0.1);
+    border: 1px solid rgba(96,165,250,0.22);
+    border-radius: 8px;
+    color: #93c5fd;
+    font-size: 0.82rem;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .proof-link svg { width: 13px; height: 13px; }
+  .proof-link:hover { background: rgba(96,165,250,0.2); }
+
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 32px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.2);
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  footer a { color: #a78bfa; text-decoration: none; }
+
+  @media (max-width: 600px) {
+    main { padding: 32px 16px 80px; gap: 36px; }
+    .card { padding: 24px 18px; }
+    .nav-links { display: none; }
+  }
+</style>
 </head>
 <body>
-  <h1>Welcome to LocaMartin</h1>
 
-  <p>This is the public homepage.</p>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
 
-  <a href="/dashboard/">Dashboard Login</a>
+<nav>
+  <a href="/" class="nav-logo">LOCAMARTIN</a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#skills">Skills</a>
+    <a href="#experience">Experience</a>
+    <a href="#projects">Projects</a>
+    <a href="#certifications">Certs</a>
+    <a href="#education">Education</a>
+    <a href="/dashboard/">Dashboard</a>
+  </div>
+</nav>
 
-<!-- Cloudflare Web Analytics -->
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
-<!-- End Cloudflare Web Analytics -->
+<main>
 
-<!-- Custom Analytics Tracker -->
+  <!-- Hero -->
+  <section id="about" class="card hero">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Hello, I'm
+    </div>
+    <h1 class="hero-name">Lokanath Pradhan</h1>
+    <div class="hero-title">Cybersecurity Researcher · Bug Bounty Hunter · Developer</div>
+    <p class="hero-summary">
+      Cybersecurity professional with hands-on experience in web application &amp; network vulnerability assessment,
+      bug bounty research, and security tool development. 50+ vulnerability reports submitted across HackerProof,
+      HackerOne, Bugcrowd, immunefi (Web3), and direct disclosures — with bounty-paid and resolved findings at
+      Max Healthcare, Perfios, TATA Motors, HDFC Life, Synology, Adidas, and Hero MotoCorp.
+      Critical-severity Web3 finding on Berachain. Proficient in Python, Go, JavaScript, and Shell scripting.
+    </p>
+    <div class="hero-links">
+      <a class="hero-link" href="https://github.com/locamartin" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        GitHub
+      </a>
+      <a class="hero-link" href="https://linkedin.com/in/loca-martin-014ab2278" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a class="hero-link" href="https://medium.com/@locamartin" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zM20.96 12c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>
+        Medium
+      </a>
+      <a class="hero-link" href="https://gist.github.com/LocaMartin/7d05af88e7c5817473450a0e630b80fe#file-proof-md" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Proof of Findings
+      </a>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills" class="card">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Technical Skills
+    </div>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <h4>Languages</h4>
+        <div class="tags">
+          <span class="tag tag-purple">JavaScript</span>
+          <span class="tag tag-purple">Python</span>
+          <span class="tag tag-purple">Golang</span>
+          <span class="tag tag-purple">Bash</span>
+          <span class="tag tag-purple">PowerShell</span>
+          <span class="tag tag-purple">HTML5/CSS3</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Frameworks</h4>
+        <div class="tags">
+          <span class="tag tag-blue">React.js</span>
+          <span class="tag tag-blue">Flask</span>
+          <span class="tag tag-blue">Django</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Security Tools</h4>
+        <div class="tags">
+          <span class="tag tag-pink">Burp Suite</span>
+          <span class="tag tag-pink">Nuclei</span>
+          <span class="tag tag-pink">Metasploit</span>
+          <span class="tag tag-pink">Nmap</span>
+          <span class="tag tag-pink">Wireshark</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Cybersecurity</h4>
+        <div class="tags">
+          <span class="tag tag-green">Web App Pentesting</span>
+          <span class="tag tag-green">Bug Bounty</span>
+          <span class="tag tag-green">OSINT</span>
+          <span class="tag tag-green">Red Teaming</span>
+          <span class="tag tag-green">SOC L1</span>
+          <span class="tag tag-green">Network Recon</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Dev &amp; Cloud</h4>
+        <div class="tags">
+          <span class="tag tag-blue">Git / GitHub</span>
+          <span class="tag tag-blue">AWS</span>
+          <span class="tag tag-blue">Docker</span>
+          <span class="tag tag-blue">Telegram API</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h4>Vuln Classes</h4>
+        <div class="tags">
+          <span class="tag tag-pink">SSRF</span>
+          <span class="tag tag-pink">XSS</span>
+          <span class="tag tag-pink">CORS</span>
+          <span class="tag tag-pink">Cache Poisoning</span>
+          <span class="tag tag-pink">PII Exposure</span>
+          <span class="tag tag-pink">Host Header Injection</span>
+          <span class="tag tag-pink">Web3 / Mempool</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section id="experience" class="card">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      Experience
+    </div>
+
+    <div class="exp-item">
+      <div class="exp-header">
+        <div>
+          <div class="exp-role">Independent Security Researcher</div>
+          <div class="exp-where">Bug Bounty — HackerProof, HackerOne, Bugcrowd, immunefi, Direct Disclosure</div>
+        </div>
+        <span class="exp-date">2024 – Present</span>
+      </div>
+      <ul class="exp-bullets">
+        <li>50+ vulnerability reports across 6+ platforms; findings include Bounty-Paid, Resolved, and In-Review statuses across public and private programs.</li>
+        <li><strong style="color:var(--text)">HackerProof (Com Olho)</strong> — 38 reports at Max Healthcare, Perfios, Allcargo, TATA Motors, HDFC Life, Zerodha, Orient Electric and more. Bounty-paid: Unauthenticated PII Exposure (Perfios P4), Session Cookie Server-Side Exceptions (Max Healthcare P2).</li>
+        <li><strong style="color:var(--text)">HackerOne</strong> — Reports at LinkedIn (Business Logic / Rate Limit Bypass, High), 8x8 (Host Header Injection / Cache Poisoning, Medium), Remitly, Deribit, Status (CVE-2025-59474).</li>
+        <li><strong style="color:var(--text)">immunefi (Web3)</strong> — Critical finding on Berachain: Public RPC leaks live Mempool data via txpool_content, enabling frontrunning attacks (#50274).</li>
+        <li><strong style="color:var(--text)">Direct Disclosure</strong> — SSRF + OAuth PII leakage (Adidas); Nginx Config Disclosure (Hero MotoCorp, acknowledged); CORS Misconfiguration CDN credential leakage, High (Synology).</li>
+        <li><strong style="color:var(--text)">Bugcrowd</strong> — Directory Listing (Monash University), Prometheus Node Exporter on 26 production hosts (Opera), AWS Access Key Exposure, DNS Rebinding (Ibotta).</li>
+      </ul>
+      <a class="proof-link" href="https://gist.github.com/LocaMartin/7d05af88e7c5817473450a0e630b80fe#file-proof-md" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Proof of findings (Gist)
+      </a>
+    </div>
+
+    <hr class="exp-divider">
+
+    <div class="exp-item">
+      <div class="exp-header">
+        <div>
+          <div class="exp-role">Python Intern</div>
+          <div class="exp-where">Twintechn Engineering &amp; Design Technology Pvt. Ltd.</div>
+        </div>
+        <span class="exp-date">2023 · 1 Month</span>
+      </div>
+      <ul class="exp-bullets">
+        <li>Contributed to Python automation scripts during a 1-month internship.</li>
+        <li>Gained practical exposure to real-world software engineering and development workflows.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="card">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Projects
+    </div>
+    <div class="projects-grid">
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          CredStore
+        </div>
+        <div class="project-desc">Cross-platform credential management / password manager app.</div>
+        <div class="tags"><span class="tag tag-blue">Python</span><span class="tag tag-blue">Flask</span></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          EvilEye
+        </div>
+        <div class="project-desc">IoT offensive security tool based on ESP32 Node MCU.</div>
+        <div class="tags"><span class="tag tag-pink">C/C++</span><span class="tag tag-pink">ESP32</span></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          TLDX
+        </div>
+        <div class="project-desc">Top-level domain expansion tool using the IANA domain list.</div>
+        <div class="tags"><span class="tag tag-purple">Python</span></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          403
+        </div>
+        <div class="project-desc">HTTP 403 bypass tool for penetration testers.</div>
+        <div class="tags"><span class="tag tag-purple">Python</span><span class="tag tag-green">Bash</span></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          CryptoCut
+        </div>
+        <div class="project-desc">Web3 fuzzing tool for smart contract security testing.</div>
+        <div class="tags"><span class="tag tag-blue">JavaScript</span><span class="tag tag-blue">Web3</span></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          turtle
+        </div>
+        <div class="project-desc">CLI file sharing tool via Telegram Bot API with config automation.</div>
+        <div class="tags"><span class="tag tag-green">Golang</span><span class="tag tag-green">Telegram API</span></div>
+      </div>
+
+      <div class="project-card">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          netcon
+        </div>
+        <div class="project-desc">Network misconfiguration discovery tool.</div>
+        <div class="tags"><span class="tag tag-purple">Python</span><span class="tag tag-green">Bash</span></div>
+      </div>
+
+      <div class="project-card" style="border-color: var(--purple-border); background: var(--purple-dim);">
+        <div class="project-name">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          <a href="https://github.com/locamartin" target="_blank" rel="noopener">All projects on GitHub →</a>
+        </div>
+        <div class="project-desc">More tools and research available on my GitHub profile.</div>
+        <div class="tags"><span class="tag tag-purple">github.com/locamartin</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTF & Labs -->
+  <section id="ctf" class="card">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      CTF &amp; Security Labs
+    </div>
+    <div class="ctf-row">
+      <div class="ctf-stat"><div class="num">7+</div><div class="lbl">HTB Badges</div></div>
+      <div class="ctf-stat"><div class="num">10</div><div class="lbl">THM Paths</div></div>
+      <div class="ctf-stat"><div class="num">50+</div><div class="lbl">Vuln Reports</div></div>
+      <div class="ctf-stat"><div class="num">6+</div><div class="lbl">Platforms</div></div>
+    </div>
+    <div style="margin-top: 20px;">
+      <p style="font-size:0.87rem; color:var(--muted); margin-bottom: 12px;">Completed TryHackMe paths:</p>
+      <div class="tags">
+        <span class="tag tag-green">Web App Red Teaming</span>
+        <span class="tag tag-green">Red Teaming</span>
+        <span class="tag tag-green">Web App Pentesting</span>
+        <span class="tag tag-green">Jr. Penetration Tester</span>
+        <span class="tag tag-green">SOC Level 1</span>
+        <span class="tag tag-green">Security Engineer</span>
+        <span class="tag tag-green">Cyber Security 101</span>
+        <span class="tag tag-green">Pre-Security</span>
+        <span class="tag tag-green">DevSecOps</span>
+        <span class="tag tag-green">Web Fundamentals</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Certifications -->
+  <section id="certifications" class="card">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+      Certifications
+    </div>
+    <div class="cert-list">
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">Web Application Red Teaming</div><div class="cert-issuer">TryHackMe · THM-QTORDPWTLH</div></div>
+        </div>
+        <span class="cert-date">Feb 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">Red Teaming Certificate</div><div class="cert-issuer">TryHackMe · THM-MX2CT1OWUV</div></div>
+        </div>
+        <span class="cert-date">Feb 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">Web Application Pentesting</div><div class="cert-issuer">TryHackMe · THM-VFQY7ULUSF</div></div>
+        </div>
+        <span class="cert-date">Feb 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">Jr Penetration Tester</div><div class="cert-issuer">TryHackMe · THM-RZ5TO4GFL3</div></div>
+        </div>
+        <span class="cert-date">Feb 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">SOC Level 1</div><div class="cert-issuer">TryHackMe · THM-BWZLC7GWR8</div></div>
+        </div>
+        <span class="cert-date">Feb 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">Security Engineer</div><div class="cert-issuer">TryHackMe · THM-52XT7PRMM7</div></div>
+        </div>
+        <span class="cert-date">Feb 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div><div class="cert-name">DevSecOps</div><div class="cert-issuer">TryHackMe · THM-6O8OSRSEXB</div></div>
+        </div>
+        <span class="cert-date">Jan 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div><div class="cert-name">AWS Introduction to Containers</div><div class="cert-issuer">Amazon Web Services · a263bbef-b739-4f49-ad5a-073faa97ad71</div></div>
+        </div>
+        <span class="cert-date">Jan 2026</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div><div class="cert-name">Tech Mahindra Cybersecurity (MSDE Skill India)</div><div class="cert-issuer">NSDC · 9390e20a-9cac-48f7-9fb4-35eddca4aeae</div></div>
+        </div>
+        <span class="cert-date">Jul 2025</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div><div class="cert-name">ISC2 Candidate</div><div class="cert-issuer">ISC2 · 2a33246e-6a45-4269-a9dd-220cc3e1daa4</div></div>
+        </div>
+        <span class="cert-date">Jun 2025</span>
+      </div>
+
+      <div class="cert-item">
+        <div class="cert-left">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div><div class="cert-name">Cybersecurity Fundamentals</div><div class="cert-issuer">IBM · 31252357-04ef-4b8d-a97e-09334cc7d933</div></div>
+        </div>
+        <span class="cert-date">Jun 2025</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Education -->
+  <section id="education" class="card">
+    <div class="section-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      Education
+    </div>
+    <div class="edu-grid">
+      <div class="edu-card">
+        <div class="edu-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <div class="edu-degree">CS &amp; Engineering (Diploma)</div>
+        </div>
+        <div class="edu-inst">KIIT Polytechnic, Bhubaneswar</div>
+        <div class="edu-meta">2023</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <div class="edu-degree">PGDCA</div>
+        </div>
+        <div class="edu-inst">UCC Utkal Computer Center</div>
+        <div class="edu-meta">2019</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <div class="edu-degree">+2 / 12th</div>
+        </div>
+        <div class="edu-inst">C.H.S.E Board, Odisha</div>
+        <div class="edu-meta">2020</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Built by <a href="/">Lokanath Pradhan</a> · <a href="https://github.com/locamartin" target="_blank" rel="noopener">github.com/locamartin</a>
+</footer>
+
 <script>
   fetch("https://locamartin-auth.locamartin.workers.dev/track", {
     method: "POST",
