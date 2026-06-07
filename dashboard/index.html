@@ -10,6 +10,8 @@
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <link rel="stylesheet" href="../css/dashboard.css">
+<!-- DOMPurify for XSS sanitization -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
 </head>
 <body>
 
@@ -539,14 +541,32 @@ function renderAnalytics(data, totalId, chartId, pagesId) {
   const chartH = chart.offsetHeight || 80;
   Object.entries(days).forEach(([date, count]) => {
     const h = Math.max(Math.round((count/maxVal)*(chartH-14)), count>0?4:2);
-    chart.innerHTML += `<div class="bar-col"><div class="bar" style="height:${h}px" title="${count} views"></div><div class="bar-label">${date.slice(5)}</div></div>`;
+    // date/count come from our own backend — still use DOM API as defence-in-depth
+    const col = document.createElement("div"); col.className = "bar-col";
+    const bar = document.createElement("div"); bar.className = "bar";
+    bar.style.height = h + "px"; bar.title = count + " views";
+    const lbl = document.createElement("div"); lbl.className = "bar-label";
+    lbl.textContent = date.slice(5);
+    col.appendChild(bar); col.appendChild(lbl);
+    chart.appendChild(col);
   });
   const pagesDiv = document.getElementById(pagesId);
   pagesDiv.innerHTML = "";
   const sorted = Object.entries(data.topPages||{}).sort((a,b)=>b[1]-a[1]);
   if (!sorted.length) { pagesDiv.innerHTML='<p style="color:rgba(255,255,255,0.28);font-size:0.82rem">No data yet.</p>'; return; }
-  sorted.forEach(([page,count]) => {
-    pagesDiv.innerHTML += `<div class="page-row"><span class="page-name">${page}</span><span class="page-count">${count}</span></div>`;
+  sorted.forEach(([page, count]) => {
+    // fix #1: DOM API instead of innerHTML to prevent Stored XSS
+    const row = document.createElement("div");
+    row.className = "page-row";
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "page-name";
+    nameSpan.textContent = page; // attacker-controlled — MUST use textContent
+    const countSpan = document.createElement("span");
+    countSpan.className = "page-count";
+    countSpan.textContent = String(count);
+    row.appendChild(nameSpan);
+    row.appendChild(countSpan);
+    pagesDiv.appendChild(row);
   });
 }
 
@@ -612,14 +632,25 @@ function renderFpNotesList() {
     const n = notes[id];
     const div = document.createElement("div");
     div.className = "note-item" + (id === currentNoteId ? " active" : "");
-    div.innerHTML = `
-      <div class="note-item-info" onclick="openNote('${id}')">
-        <div class="note-item-title">${n.title || "Untitled"}</div>
-        <div class="note-item-date">${new Date(n.date).toLocaleDateString()}</div>
-      </div>
-      <button class="note-item-del" onclick="deleteNote('${id}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      </button>`;
+    // Safe DOM construction — no innerHTML with user data (fix #2 & #4)
+    const info = document.createElement("div");
+    info.className = "note-item-info";
+    info.style.cursor = "pointer";
+    info.addEventListener("click", () => openNote(id));
+    const titleDiv = document.createElement("div");
+    titleDiv.className = "note-item-title";
+    titleDiv.textContent = n.title || "Untitled"; // fix #2: textContent not innerHTML
+    const dateDiv = document.createElement("div");
+    dateDiv.className = "note-item-date";
+    dateDiv.textContent = new Date(n.date).toLocaleDateString();
+    info.appendChild(titleDiv);
+    info.appendChild(dateDiv);
+    const delBtn = document.createElement("button");
+    delBtn.className = "note-item-del";
+    delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+    delBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteNote(id); }); // fix #4
+    div.appendChild(info);
+    div.appendChild(delBtn);
     list.appendChild(div);
   });
 }
@@ -634,8 +665,19 @@ function renderSidebarNotesList() {
     const div = document.createElement("div");
     div.className = "note-item";
     div.style.cursor = "pointer";
-    div.innerHTML = `<div class="note-item-info"><div class="note-item-title">${n.title||"Untitled"}</div><div class="note-item-date">${new Date(n.date).toLocaleDateString()}</div></div>`;
-    div.onclick = () => { openFull('notes'); setTimeout(() => openNote(id), 100); };
+    // Safe DOM construction (fix #2)
+    const sbInfo = document.createElement("div");
+    sbInfo.className = "note-item-info";
+    const sbTitle = document.createElement("div");
+    sbTitle.className = "note-item-title";
+    sbTitle.textContent = n.title || "Untitled";
+    const sbDate = document.createElement("div");
+    sbDate.className = "note-item-date";
+    sbDate.textContent = new Date(n.date).toLocaleDateString();
+    sbInfo.appendChild(sbTitle);
+    sbInfo.appendChild(sbDate);
+    div.appendChild(sbInfo);
+    div.addEventListener("click", () => { openFull("notes"); setTimeout(() => openNote(id), 100); }); // fix #4
     list.appendChild(div);
   });
 }
@@ -650,14 +692,14 @@ function openNote(id) {
   currentNoteId = id;
   const n = notes[id];
   document.getElementById("note-title").value = n.title || "";
-  if (quill) quill.root.innerHTML = n.content || "";
+  if (quill) quill.root.innerHTML = DOMPurify.sanitize(n.content || ""); // fix #3
   document.getElementById("note-saved").textContent = "";
   renderFpNotesList();
 }
 function saveCurrentNote() {
   if (!currentNoteId) return;
   notes[currentNoteId].title = document.getElementById("note-title").value || "Untitled";
-  notes[currentNoteId].content = quill ? quill.root.innerHTML : "";
+  notes[currentNoteId].content = quill ? DOMPurify.sanitize(quill.root.innerHTML) : ""; // fix #3
   notes[currentNoteId].date = Date.now();
   saveNotesToStorage();
   renderFpNotesList();
@@ -673,7 +715,7 @@ function deleteNote(id) {
   if (currentNoteId === id) {
     currentNoteId = null;
     document.getElementById("note-title").value = "";
-    if (quill) quill.root.innerHTML = "";
+    if (quill) quill.root.innerHTML = ""; // safe: no user data
   }
   renderFpNotesList();
   renderSidebarNotesList();
