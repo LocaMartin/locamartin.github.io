@@ -7,6 +7,7 @@
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
 
 <link rel="stylesheet" href="res/css/index.css">
+<script src="res/js/index.js" defer></script>
 </head>
 <body>
 
@@ -430,14 +431,6 @@
 <footer>
   Built by <a href="/">Lokanath Pradhan</a> · <a href="https://github.com/locamartin" target="_blank" rel="noopener">github.com/locamartin</a>
 </footer>
-
-<script>
-  fetch("https://locamartin-auth.locamartin.workers.dev/track", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ page: "/" })
-  }).catch(() => {});
-</script>
 
 </body>
 </html>
