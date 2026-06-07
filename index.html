@@ -3,234 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lokanath Pradhan</title>
+<title>Lokanath Pradhan — Cybersecurity Researcher</title>
 <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --purple: #a78bfa;
-    --purple-dim: rgba(167,139,250,0.15);
-    --purple-border: rgba(167,139,250,0.25);
-    --blue: #60a5fa;
-    --glass: rgba(255,255,255,0.07);
-    --glass-border: rgba(255,255,255,0.12);
-    --text: rgba(255,255,255,0.88);
-    --muted: rgba(255,255,255,0.45);
-    --green: #6ee7b7;
-    --pink: #f9a8d4;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-    background-attachment: fixed;
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.2;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .orb1 { width: 600px; height: 600px; background: #6c63ff; top: -150px; left: -150px; }
-  .orb2 { width: 450px; height: 450px; background: #ff6584; bottom: -100px; right: -100px; }
-  .orb3 { width: 350px; height: 350px; background: #43e8d8; top: 50%; left: 50%; transform: translate(-50%,-50%); }
-
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(15,12,41,0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .nav-logo {
-    font-weight: 700;
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-    background: linear-gradient(90deg, var(--purple), var(--blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-decoration: none;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .nav-logo:hover { opacity: 0.8; }
-  .nav-links { display: flex; gap: 28px; }
-  .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.88rem;
-    transition: color 0.2s;
-  }
-  .nav-links a:hover { color: var(--text); }
-
-  main {
-    position: relative;
-    z-index: 10;
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 60px 24px 100px;
-    display: flex;
-    flex-direction: column;
-    gap: 56px;
-  }
-
-  .card {
-    background: var(--glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 36px 32px;
-  }
-
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--purple);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .section-label svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-  .hero { display: flex; flex-direction: column; gap: 16px; }
-  .hero-name {
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 700;
-    line-height: 1.1;
-    background: linear-gradient(90deg, #fff 30%, var(--purple), var(--blue));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .hero-title { font-size: 1rem; color: var(--purple); letter-spacing: 1px; font-weight: 500; }
-  .hero-summary { font-size: 0.95rem; color: var(--muted); line-height: 1.75; max-width: 720px; margin-top: 4px; }
-  .hero-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-  .hero-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 16px;
-    background: var(--purple-dim);
-    border: 1px solid var(--purple-border);
-    border-radius: 50px;
-    color: #c4b5fd;
-    text-decoration: none;
-    font-size: 0.83rem;
-    transition: background 0.2s, border-color 0.2s;
-  }
-  .hero-link svg { width: 14px; height: 14px; flex-shrink: 0; }
-  .hero-link:hover { background: rgba(167,139,250,0.28); border-color: rgba(167,139,250,0.5); }
-
-  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .tag { padding: 4px 12px; border-radius: 50px; font-size: 0.78rem; font-weight: 500; }
-  .tag-purple { background: var(--purple-dim); border: 1px solid var(--purple-border); color: #c4b5fd; }
-  .tag-blue   { background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.25); color: #93c5fd; }
-  .tag-green  { background: rgba(110,231,183,0.1); border: 1px solid rgba(110,231,183,0.2); color: #6ee7b7; }
-  .tag-pink   { background: rgba(249,168,212,0.1); border: 1px solid rgba(249,168,212,0.2); color: #f9a8d4; }
-
-  .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-  .skill-group h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
-
-  .exp-item { margin-bottom: 32px; }
-  .exp-item:last-child { margin-bottom: 0; }
-  .exp-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-  .exp-role { font-size: 1rem; font-weight: 600; color: var(--text); }
-  .exp-where { font-size: 0.83rem; color: var(--purple); margin-bottom: 2px; }
-  .exp-date { font-size: 0.75rem; color: var(--muted); background: rgba(255,255,255,0.06); padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
-  .exp-bullets { list-style: none; padding: 0; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
-  .exp-bullets li { font-size: 0.87rem; color: var(--muted); line-height: 1.6; padding-left: 16px; position: relative; }
-  .exp-bullets li::before { content: "▸"; position: absolute; left: 0; color: var(--purple); font-size: 0.7rem; top: 3px; }
-  .exp-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 24px 0; }
-
-  .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-  .project-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.09);
-    border-radius: 14px;
-    padding: 20px;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .project-card:hover { border-color: var(--purple-border); background: var(--purple-dim); }
-  .project-name { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-  .project-name svg { width: 15px; height: 15px; color: var(--purple); flex-shrink: 0; }
-  .project-name a { color: inherit; text-decoration: none; }
-  .project-name a:hover { color: var(--purple); }
-  .project-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
-
-  .cert-list { display: flex; flex-direction: column; gap: 10px; }
-  .cert-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; }
-  .cert-left { display: flex; align-items: center; gap: 10px; }
-  .cert-left svg { width: 16px; height: 16px; color: var(--purple); flex-shrink: 0; }
-  .cert-name { font-size: 0.87rem; color: var(--text); font-weight: 500; }
-  .cert-issuer { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-  .cert-date { font-size: 0.72rem; color: var(--purple); background: var(--purple-dim); padding: 2px 10px; border-radius: 20px; white-space: nowrap; }
-
-  .edu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
-  .edu-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; }
-  .edu-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .edu-card-header svg { width: 16px; height: 16px; color: var(--purple); flex-shrink: 0; }
-  .edu-degree { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-  .edu-inst   { font-size: 0.8rem; color: var(--purple); margin-bottom: 4px; }
-  .edu-meta   { font-size: 0.75rem; color: var(--muted); }
-
-  .ctf-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .ctf-stat { background: rgba(110,231,183,0.08); border: 1px solid rgba(110,231,183,0.18); border-radius: 10px; padding: 10px 18px; text-align: center; }
-  .ctf-stat .num { font-size: 1.3rem; font-weight: 700; color: var(--green); }
-  .ctf-stat .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-
-  .proof-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
-    padding: 8px 16px;
-    background: rgba(96,165,250,0.1);
-    border: 1px solid rgba(96,165,250,0.22);
-    border-radius: 8px;
-    color: #93c5fd;
-    font-size: 0.82rem;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-  .proof-link svg { width: 13px; height: 13px; }
-  .proof-link:hover { background: rgba(96,165,250,0.2); }
-
-  footer {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 32px;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.2);
-    border-top: 1px solid rgba(255,255,255,0.07);
-  }
-  footer a { color: #a78bfa; text-decoration: none; }
-
-  @media (max-width: 600px) {
-    main { padding: 32px 16px 80px; gap: 36px; }
-    .card { padding: 24px 18px; }
-    .nav-links { display: none; }
-  }
-</style>
+<link rel="stylesheet" href="css/index.css">
 </head>
 <body>
 
@@ -247,6 +23,7 @@
     <a href="#projects">Projects</a>
     <a href="#certifications">Certs</a>
     <a href="#education">Education</a>
+    <a href="/dashboard/">Dashboard</a>
   </div>
 </nav>
 
@@ -628,7 +405,7 @@
           <div class="edu-degree">CS &amp; Engineering (Diploma)</div>
         </div>
         <div class="edu-inst">KIIT Polytechnic, Bhubaneswar</div>
-        <div class="edu-meta">2023</div>
+        <div class="edu-meta">2023 · 84%</div>
       </div>
       <div class="edu-card">
         <div class="edu-card-header">
@@ -636,7 +413,7 @@
           <div class="edu-degree">PGDCA</div>
         </div>
         <div class="edu-inst">UCC Utkal Computer Center</div>
-        <div class="edu-meta">2019</div>
+        <div class="edu-meta">2019 · 82%</div>
       </div>
       <div class="edu-card">
         <div class="edu-card-header">
