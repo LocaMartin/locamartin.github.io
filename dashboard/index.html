@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Private Dashboard</title>
-<script src="res/js/dashboard.js" defer></script>
-<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<!-- Quill rich text editor -->
-<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
-<link rel="stylesheet" href="../res/css/dashboard.css">
-<!-- DOMPurify for XSS sanitization -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Private Dashboard</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../res/css/dashboard.css">
+  <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
+
+  <!-- Cloudflare Analytics (fire-and-forget) -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
+
+  <!-- Google Sign-In — async only, no defer -->
+  <script src="https://accounts.google.com/gsi/client" async></script>
+
+  <!-- Dependencies — must be ready before dashboard.js runs -->
+  <script src="https://cdn.quilljs.com/1.3.7/quill.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" defer></script>
+
+  <!-- Your code — loads last, after dependencies above -->
+  <script src="../res/js/dashboard.js" defer></script>
 </head>
 <body>
 
