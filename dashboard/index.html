@@ -135,6 +135,23 @@
       <svg class="open-full" onclick="openFull('death'); event.stopPropagation();" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
     </button>
 
+    <button class="nav-item" onclick="showPanel('death-pipeline', event)">
+  <div class="nav-item-left">
+    <span class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </span>
+    Death Pipeline
+  </div>
+  <svg class="open-full" onclick="openFull('death-pipeline'); event.stopPropagation();"
+       viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+    <polyline points="15 3 21 3 21 9"/>
+    <line x1="10" y1="14" x2="21" y2="3"/>
+   </svg>
+   </button>
+
     <button class="nav-item" onclick="showPanel('notes', event)">
       <div class="nav-item-left">
         <span class="icon">
@@ -206,6 +223,37 @@
       <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Click the expand icon or the Notes button above for the full editor.</p>
       <div class="notes-list" id="sidebar-notes-list"></div>
     </div>
+<div class="panel" id="panel-death-pipeline" style="display:none">
+  <p style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">
+    Live pipeline — click expand for full view.
+  </p>
+
+  <!-- Mini stat grid -->
+  <div class="death-mini-stat-row">
+    <div class="death-mini-stat">
+      <div class="mn" id="sidebar-dstat-domains">—</div>
+      <div class="ml">BBP Domains</div>
+    </div>
+    <div class="death-mini-stat">
+      <div class="mn" id="sidebar-dstat-subs">—</div>
+      <div class="ml">Subdomains</div>
+    </div>
+    <div class="death-mini-stat">
+      <div class="mn" id="sidebar-dstat-findings" style="color:#34d399">—</div>
+      <div class="ml">Findings</div>
+    </div>
+    <div class="death-mini-stat">
+      <div class="mn" id="sidebar-dstat-processed">—</div>
+      <div class="ml">Processed</div>
+    </div>
+  </div>
+
+  <!-- Mini notification feed -->
+  <div class="section-title">Recent</div>
+  <div class="death-mini-feed" id="sidebar-death-feed">
+    <div style="font-size:0.75rem;color:var(--muted)">Loading…</div>
+  </div>
+</div>
 
   </div>
 </div>
@@ -421,6 +469,122 @@
       <button class="pe-save-btn" onclick="savePortfolio()">Save to browser</button>
       <button class="pe-save-btn" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd" onclick="exportPortfolio()">Copy as JSON</button>
     </div>
+  </div>
+</div>
+
+<!-- ── Full-page: Death Pipeline ── -->
+<div class="fullpage-panel" id="fp-death-pipeline">
+  <div class="fp-header">
+    <div class="fp-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Death Pipeline
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="death-action-btn" onclick="refreshDeathData()" title="Refresh">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Refresh
+      </button>
+      <button class="fp-close" onclick="closeFull('death-pipeline')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M6 6L18 18"/><path d="M18 6L6 18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="fp-body">
+
+    <!-- Stat cards -->
+    <div class="section-title">Scope</div>
+    <div class="death-stats-row">
+      <div class="death-stat-card">
+        <div class="ds-num" id="dstat-bbp-domains">—</div>
+        <div class="ds-label">BBP Domains</div>
+      </div>
+      <div class="death-stat-card">
+        <div class="ds-num" id="dstat-bbp-wildcards">—</div>
+        <div class="ds-label">Wildcards</div>
+      </div>
+      <div class="death-stat-card">
+        <div class="ds-num" id="dstat-bbp-ips">—</div>
+        <div class="ds-label">IPs</div>
+      </div>
+      <div class="death-stat-card">
+        <div class="ds-num" id="dstat-subdomains">—</div>
+        <div class="ds-label">Subdomains</div>
+      </div>
+      <div class="death-stat-card finding">
+        <div class="ds-num" id="dstat-findings">—</div>
+        <div class="ds-label">Total Findings</div>
+      </div>
+      <div class="death-stat-card finding">
+        <div class="ds-num" id="dstat-findings-bbp">—</div>
+        <div class="ds-label">BBP Findings</div>
+      </div>
+      <div class="death-stat-card error">
+        <div class="ds-num" id="dstat-errors">—</div>
+        <div class="ds-label">Errors</div>
+      </div>
+      <div class="death-stat-card">
+        <div class="ds-num" id="dstat-notifs">—</div>
+        <div class="ds-label">Log Events</div>
+      </div>
+    </div>
+
+    <!-- Scan progress bars -->
+    <div class="section-title">Scan Progress</div>
+    <div class="death-scope-section">
+      <div class="death-scope-row">
+        <div class="death-scope-label">BBP Nuclei</div>
+        <div class="death-scope-bar-wrap">
+          <div class="death-scope-bar" id="dbar-bbp-processed" style="width:0%"></div>
+        </div>
+        <div class="death-scope-count" id="dbar-bbp-count">0 / 0</div>
+      </div>
+      <div class="death-scope-row">
+        <div class="death-scope-label">Sub Nuclei</div>
+        <div class="death-scope-bar-wrap">
+          <div class="death-scope-bar green" id="dbar-sub-processed" style="width:0%"></div>
+        </div>
+        <div class="death-scope-count" id="dbar-sub-count">0 / 0</div>
+      </div>
+    </div>
+
+    <!-- Workflow run cards -->
+    <div class="section-title">Latest Workflow Runs</div>
+    <div class="death-runs-grid" id="death-runs-grid">
+      <div class="death-loading">Loading GitHub runs…</div>
+    </div>
+
+    <!-- Notification feed -->
+    <div class="death-feed-header">
+      <div class="section-title" style="margin:0">Notification Log</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div class="death-feed-filters">
+          <button class="death-filter-btn active" onclick="setDeathFilter('', this)">All</button>
+          <button class="death-filter-btn" onclick="setDeathFilter('bbp', this)">BBP</button>
+          <button class="death-filter-btn" onclick="setDeathFilter('sub', this)">Sub</button>
+          <button class="death-filter-btn" onclick="setDeathFilter('subrecon', this)">Subrecon</button>
+          <button class="death-filter-btn" onclick="setDeathFilter('bbscope', this)">BBScope</button>
+          <button class="death-filter-btn" onclick="setDeathFilter('cleanup', this)">Cleanup</button>
+        </div>
+        <div class="death-feed-actions">
+          <button class="death-action-btn danger" onclick="deleteOldDeathNotifs()">Clear old</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="death-feed-loading" class="death-loading" style="display:none">Loading notifications…</div>
+    <div class="death-feed" id="death-feed">
+      <div class="death-empty">Loading…</div>
+    </div>
+    <div class="death-last-updated" id="death-last-updated"></div>
+
   </div>
 </div>
 

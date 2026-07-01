@@ -73,7 +73,7 @@ function closeSidebar() {
 }
 
 // ── Panel switch (sidebar) ──
-function showPanel(name, evt) {
+/*function showPanel(name, evt) {
   document.querySelectorAll(".panel").forEach((p) => {
     p.style.display = "none";
     p.classList.remove("active");
@@ -89,10 +89,25 @@ function showPanel(name, evt) {
     loadAnalytics();
     analyticsLoaded = true;
   }
+}*/
+
+function showPanel(name, evt) {
+  document.querySelectorAll(".panel").forEach((p) => {
+    p.style.display = "none";
+    p.classList.remove("active");
+  });
+  document.querySelectorAll(".nav-item").forEach((b) => b.classList.remove("active"));
+  const panel = document.getElementById("panel-" + name);
+  panel.style.display = "block";
+  panel.classList.add("active");
+  if (evt) evt.currentTarget.classList.add("active");
+  if (name === "analytics" && !analyticsLoaded) { loadAnalytics(); analyticsLoaded = true; }
+  if (name === "death-pipeline") loadDeathDashboard();       // ← ADD THIS LINE
 }
 
 // ── Full-page open/close ──
-function openFull(name) {
+
+/*function openFull(name) {
   closeSidebar();
   document.getElementById("fp-" + name).classList.add("open");
   if (name === "analytics") loadAnalyticsFull();
@@ -102,11 +117,23 @@ function openFull(name) {
   }
   if (name === "portfolio") loadPortfolioFields();
   document.body.style.overflow = "hidden";
+}*/
+
+function openFull(name) {
+  closeSidebar();
+  document.getElementById("fp-" + name).classList.add("open");
+  if (name === "analytics")       loadAnalyticsFull();
+  if (name === "notes")           { loadNotesFromStorage(); renderFpNotesList(); }
+  if (name === "portfolio")       loadPortfolioFields();
+  if (name === "death-pipeline")  loadDeathDashboard();      // ← ADD THIS LINE
+  document.body.style.overflow = "hidden";
 }
+
 function closeFull(name) {
   document.getElementById("fp-" + name).classList.remove("open");
   document.body.style.overflow = "";
 }
+
 // ESC key closes any open full-page panel
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
@@ -466,4 +493,299 @@ function exportPortfolio() {
     c.textContent = "✓ Copied to clipboard";
     setTimeout(() => (c.textContent = ""), 2500);
   });
+}
+
+// ══════════════════════════════════════════════════════════
+// DEATH PROJECT PANEL
+// ══════════════════════════════════════════════════════════
+
+let deathFilter     = "";         // active tag filter
+let deathItems      = [];         // cached notification items
+let deathStats      = null;       // cached stats
+let deathLoaded     = false;
+let deathRefreshTimer = null;
+
+// Workflow display names
+const DEATH_WF_NAMES = {
+  "bbscope.yml":           "BBScope Fetcher",
+  "nuclei_header_bbp.yml": "Nuclei BBP",
+  "nuclei_header_sub.yml": "Nuclei Sub",
+  "subrecon.yml":          "Subrecon",
+};
+
+// ── Entry point called when full-page panel opens ──
+async function loadDeathDashboard() {
+  if (deathLoaded && deathStats) {
+    renderDeathStats(deathStats);
+    renderDeathFeed(deathItems);
+    return;
+  }
+  await refreshDeathData();
+
+  // Auto-refresh every 60 seconds while panel is open
+  clearInterval(deathRefreshTimer);
+  deathRefreshTimer = setInterval(() => {
+    const panel = document.getElementById("fp-death-pipeline");
+    if (panel && panel.classList.contains("open")) {
+      refreshDeathData();
+    } else {
+      clearInterval(deathRefreshTimer);
+    }
+  }, 60000);
+}
+
+async function refreshDeathData() {
+  setDeathLoading(true);
+  try {
+    const [statsRes, notifsRes] = await Promise.all([
+      fetch(WORKER + "/death/stats"),
+      fetch(WORKER + "/death/notifications?limit=100")
+    ]);
+
+    if (statsRes.ok) {
+      deathStats = await statsRes.json();
+      renderDeathStats(deathStats);
+      renderDeathSidebarStats(deathStats);
+    }
+
+    if (notifsRes.ok) {
+      const data = await notifsRes.json();
+      deathItems = data.items ?? [];
+      renderDeathFeed(deathItems);
+      renderDeathSidebarFeed(deathItems);
+    }
+
+    deathLoaded = true;
+  } catch (e) {
+    console.error("Death data load error:", e);
+  }
+  setDeathLoading(false);
+  updateDeathLastUpdated();
+}
+
+function setDeathLoading(on) {
+  const el = document.getElementById("death-feed-loading");
+  if (el) el.style.display = on ? "block" : "none";
+}
+
+function updateDeathLastUpdated() {
+  const el = document.getElementById("death-last-updated");
+  if (el) el.textContent = "Updated " + new Date().toLocaleTimeString();
+}
+
+// ── Render stats section ──
+function renderDeathStats(s) {
+  if (!s) return;
+  const scope    = s.scope    ?? {};
+  const findings = s.findings ?? {};
+  const notifs   = s.notifications ?? {};
+
+  // Stat cards
+  setDeathEl("dstat-bbp-domains",   scope.bbpDomains   ?? 0);
+  setDeathEl("dstat-bbp-wildcards", scope.bbpWildcards ?? 0);
+  setDeathEl("dstat-bbp-ips",       scope.bbpIPs       ?? 0);
+  setDeathEl("dstat-subdomains",    scope.subdomains   ?? 0);
+  setDeathEl("dstat-findings",      findings.total     ?? 0);
+  setDeathEl("dstat-findings-bbp",  findings.bbp       ?? 0);
+  setDeathEl("dstat-errors",        notifs.errors      ?? 0);
+  setDeathEl("dstat-notifs",        notifs.total       ?? 0);
+
+  // Progress bars
+  const bbpTotal = scope.bbpDomains || 1;
+  const subTotal = scope.subdomains || 1;
+  setDeathBar("dbar-bbp-processed",  scope.bbpProcessed ?? 0, bbpTotal);
+  setDeathBar("dbar-sub-processed",  scope.subProcessed ?? 0, subTotal);
+  setDeathEl("dbar-bbp-count", `${(scope.bbpProcessed ?? 0).toLocaleString()} / ${bbpTotal.toLocaleString()}`);
+  setDeathEl("dbar-sub-count", `${(scope.subProcessed ?? 0).toLocaleString()} / ${subTotal.toLocaleString()}`);
+
+  // Workflow run cards
+  renderDeathRunCards(s.runs ?? []);
+}
+
+function setDeathEl(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = typeof val === "number" ? val.toLocaleString() : val;
+}
+
+function setDeathBar(id, val, total) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = (Math.min((val / total) * 100, 100).toFixed(1)) + "%";
+}
+
+function renderDeathRunCards(runs) {
+  const container = document.getElementById("death-runs-grid");
+  if (!container) return;
+  container.innerHTML = "";
+
+  if (!runs.length) {
+    container.innerHTML = '<p class="death-empty" style="padding:12px">No recent run data.</p>';
+    return;
+  }
+
+  for (const r of runs) {
+    const name       = DEATH_WF_NAMES[r.workflow] ?? r.workflow;
+    const conclusion = r.conclusion ?? r.status ?? "unknown";
+    const cssClass   = r.status === "in_progress" ? "in_progress"
+                     : r.conclusion === "success"   ? "success"
+                     : r.conclusion === "failure"   ? "failure"
+                     : r.conclusion === "cancelled" ? "cancelled"
+                     : "unknown";
+
+    const elapsed = r.updated_at
+      ? timeAgo(new Date(r.updated_at))
+      : "";
+
+    const card = document.createElement("a");
+    card.className = `death-run-card ${cssClass}`;
+    card.href      = r.html_url ?? "#";
+    card.target    = "_blank";
+    card.rel       = "noopener";
+
+    const label = r.status === "in_progress" ? "Running"
+                : (r.conclusion ?? "Unknown");
+
+    card.innerHTML = `
+      <div class="death-run-name">
+        <div class="death-run-dot ${cssClass}"></div>
+        ${escHtml(name)}
+      </div>
+      <div class="death-run-meta">${escHtml(label)} · ${escHtml(elapsed)}</div>
+      <div class="death-run-number">#${r.run_number ?? "?"}</div>`;
+    container.appendChild(card);
+  }
+}
+
+// ── Render notification feed ──
+function renderDeathFeed(items) {
+  const feed = document.getElementById("death-feed");
+  if (!feed) return;
+
+  const filtered = deathFilter
+    ? items.filter(i => i.tag === deathFilter)
+    : items;
+
+  feed.innerHTML = "";
+
+  if (!filtered.length) {
+    feed.innerHTML = '<div class="death-empty">No notifications yet.<br>Run a workflow to see logs here.</div>';
+    return;
+  }
+
+  for (const item of filtered) {
+    const entry = document.createElement("div");
+    entry.className = `death-entry ${item.type ?? "info"}`;
+
+    const time   = item.ts ? new Date(item.ts * 1000).toLocaleString() : "";
+    const typeBadge = item.type && item.type !== "info"
+      ? `<span class="death-entry-type-badge ${item.type}">${item.type.toUpperCase()}</span>`
+      : "";
+
+    // Build top row safely
+    const top = document.createElement("div");
+    top.className = "death-entry-top";
+
+    const tagPill = document.createElement("span");
+    tagPill.className = `death-tag-pill ${item.tag ?? "general"}`;
+    tagPill.textContent = item.tag ?? "general";
+    top.appendChild(tagPill);
+
+    if (item.type && item.type !== "info") {
+      const badge = document.createElement("span");
+      badge.className = `death-entry-type-badge ${item.type}`;
+      badge.textContent = item.type.toUpperCase();
+      top.appendChild(badge);
+    }
+
+    const timeEl = document.createElement("span");
+    timeEl.className = "death-entry-time";
+    timeEl.textContent = time;
+    top.appendChild(timeEl);
+
+    // Text body — highlight URLs and domain findings
+    const textEl = document.createElement("div");
+    textEl.className = "death-entry-text";
+    textEl.textContent = item.text ?? "";
+
+    entry.appendChild(top);
+    entry.appendChild(textEl);
+    feed.appendChild(entry);
+  }
+}
+
+// ── Sidebar preview ──
+function renderDeathSidebarStats(s) {
+  const scope    = s?.scope    ?? {};
+  const findings = s?.findings ?? {};
+
+  const mn = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = typeof v === "number" ? v.toLocaleString() : v;
+  };
+  mn("sidebar-dstat-domains",   scope.bbpDomains  ?? 0);
+  mn("sidebar-dstat-subs",      scope.subdomains  ?? 0);
+  mn("sidebar-dstat-findings",  findings.total    ?? 0);
+  mn("sidebar-dstat-processed", scope.bbpProcessed ?? 0);
+}
+
+function renderDeathSidebarFeed(items) {
+  const feed = document.getElementById("sidebar-death-feed");
+  if (!feed) return;
+  feed.innerHTML = "";
+
+  const top5 = items.slice(0, 5);
+  if (!top5.length) {
+    feed.innerHTML = '<div style="font-size:0.75rem;color:var(--muted)">No notifications yet.</div>';
+    return;
+  }
+
+  for (const item of top5) {
+    const div = document.createElement("div");
+    div.className = `death-mini-entry ${item.type ?? "info"}`;
+    div.textContent = item.text?.split("\n")[0] ?? "";
+    div.title = item.text ?? "";
+    div.style.cursor = "pointer";
+    div.addEventListener("click", () => { openFull("death-pipeline"); });
+    feed.appendChild(div);
+  }
+}
+
+// ── Filter buttons ──
+function setDeathFilter(tag, el) {
+  deathFilter = tag;
+  document.querySelectorAll(".death-filter-btn").forEach(b => b.classList.remove("active"));
+  if (el) {
+    el.classList.add("active");
+    if (tag) el.classList.add(tag);
+  }
+  renderDeathFeed(deathItems);
+}
+
+// ── Delete old notifications ──
+async function deleteOldDeathNotifs() {
+  if (!confirm("Delete notifications older than 7 days?")) return;
+  try {
+    const res = await fetch(WORKER + "/death/notifications?older_than=604800", { method: "DELETE" });
+    const data = await res.json();
+    alert(`Deleted ${data.deleted} old notifications.`);
+    await refreshDeathData();
+  } catch (e) {
+    alert("Delete failed: " + e.message);
+  }
+}
+
+// ── Utilities ──
+function timeAgo(date) {
+  const sec = Math.floor((Date.now() - date) / 1000);
+  if (sec < 60)   return "just now";
+  if (sec < 3600) return Math.floor(sec / 60) + "m ago";
+  if (sec < 86400) return Math.floor(sec / 3600) + "h ago";
+  return Math.floor(sec / 86400) + "d ago";
+}
+
+function escHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
