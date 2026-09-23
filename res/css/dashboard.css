@@ -51,6 +51,48 @@ body {
 .login-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
 .google-btn-wrap { display: flex; justify-content: center; }
 
+.auth-label {
+  display: block;
+  text-align: left;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 12px 0 6px;
+}
+#login-form input {
+  display: block;
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.2);
+  color: var(--text);
+  outline: none;
+}
+#login-form input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px var(--purple-dim);
+}
+.login-submit {
+  width: 100%;
+  margin-top: 18px;
+  padding: 11px 14px;
+  border: 1px solid var(--purple-border);
+  border-radius: 10px;
+  background: var(--purple-dim);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.login-submit:hover { background: rgba(167,139,250,0.28); }
+.login-submit:disabled { opacity: 0.55; cursor: wait; }
+.login-error {
+  min-height: 20px;
+  margin: 10px 0 0 !important;
+  color: var(--red) !important;
+  font-size: 0.8rem !important;
+}
+
+
 /* ── App ── */
 #app { display: none; position: relative; z-index: 10; }
 

@@ -27,29 +27,80 @@ window.addEventListener("load", () => {
   loadNotesFromStorage();
 });
 
-// ── Google login ──
-async function handleCredentialResponse(response) {
-  const res = await fetch(WORKER, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token: response.credential }),
-  });
-  const data = await res.json();
-  if (data.success) {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    trackPage();
-    loadNotesFromStorage();
-    renderSidebarNotesList();
-  } else {
-    alert("Access denied.");
+// ── Username/password session login ──
+async function verifySession() {
+  try {
+    const res = await fetch(WORKER + "/session", {
+      method: "GET",
+      credentials: "include",
+    });
+    return res.ok && (await res.json()).success === true;
+  } catch {
+    return false;
   }
 }
+
+function showApp() {
+  const login = document.getElementById("login-screen");
+  const app = document.getElementById("app");
+  if (login) login.style.display = "none";
+  if (app) app.style.display = "block";
+  trackPage();
+  loadNotesFromStorage();
+  renderSidebarNotesList();
+}
+
+async function loginWithPassword(username, password) {
+  const res = await fetch(WORKER + "/login", { // Changed /verify to /login
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && data.success) {
+    showApp();
+    return true;
+  }
+  const error = document.getElementById("login-error");
+  if (error) error.textContent = data.error || "Invalid username or password.";
+  return false;
+}
+
+async function logout() {
+  await fetch(WORKER + "/logout", {
+    method: "POST",
+    credentials: "include",
+  }).catch(() => {});
+  window.location.reload();
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const form = document.getElementById("login-form");
+  if (form) {
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const button = form.querySelector("button[type=submit]");
+      const error = document.getElementById("login-error");
+      if (error) error.textContent = "";
+      if (button) { button.disabled = true; button.textContent = "Signing in…"; }
+      await loginWithPassword(
+        document.getElementById("username").value,
+        document.getElementById("password").value
+      );
+      if (button) { button.disabled = false; button.textContent = "Sign in"; }
+    });
+  }
+
+  if (await verifySession()) showApp();
+});
+
 function trackPage() {
   fetch(WORKER + "/track", {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ page: "/dashboard" }),
+    body: JSON.stringify({ page: "/death" }),
   }).catch(() => {});
 }
 
@@ -73,24 +124,6 @@ function closeSidebar() {
 }
 
 // ── Panel switch (sidebar) ──
-/*function showPanel(name, evt) {
-  document.querySelectorAll(".panel").forEach((p) => {
-    p.style.display = "none";
-    p.classList.remove("active");
-  });
-  document
-    .querySelectorAll(".nav-item")
-    .forEach((b) => b.classList.remove("active"));
-  const panel = document.getElementById("panel-" + name);
-  panel.style.display = "block";
-  panel.classList.add("active");
-  if (evt) evt.currentTarget.classList.add("active");
-  if (name === "analytics" && !analyticsLoaded) {
-    loadAnalytics();
-    analyticsLoaded = true;
-  }
-}*/
-
 function showPanel(name, evt) {
   document.querySelectorAll(".panel").forEach((p) => {
     p.style.display = "none";
@@ -102,30 +135,17 @@ function showPanel(name, evt) {
   panel.classList.add("active");
   if (evt) evt.currentTarget.classList.add("active");
   if (name === "analytics" && !analyticsLoaded) { loadAnalytics(); analyticsLoaded = true; }
-  if (name === "death-pipeline") loadDeathDashboard();       // ← ADD THIS LINE
+  if (name === "death-pipeline") loadDeathDashboard();
 }
 
 // ── Full-page open/close ──
-
-/*function openFull(name) {
-  closeSidebar();
-  document.getElementById("fp-" + name).classList.add("open");
-  if (name === "analytics") loadAnalyticsFull();
-  if (name === "notes") {
-    loadNotesFromStorage();
-    renderFpNotesList();
-  }
-  if (name === "portfolio") loadPortfolioFields();
-  document.body.style.overflow = "hidden";
-}*/
-
 function openFull(name) {
   closeSidebar();
   document.getElementById("fp-" + name).classList.add("open");
   if (name === "analytics")       loadAnalyticsFull();
   if (name === "notes")           { loadNotesFromStorage(); renderFpNotesList(); }
   if (name === "portfolio")       loadPortfolioFields();
-  if (name === "death-pipeline")  loadDeathDashboard();      // ← ADD THIS LINE
+  if (name === "death-pipeline")  loadDeathDashboard();
   document.body.style.overflow = "hidden";
 }
 
@@ -150,7 +170,7 @@ async function loadAnalytics() {
   document.getElementById("analytics-content").style.display = "none";
   document.getElementById("error-msg").style.display = "none";
   try {
-    const data = await (await fetch(WORKER + "/stats")).json();
+    const data = await (await fetch(WORKER + "/stats", { credentials: "include" })).json();
     renderAnalytics(data, "total-views", "chart", "top-pages");
     document.getElementById("loading-msg").style.display = "none";
     document.getElementById("analytics-content").style.display = "block";
@@ -163,7 +183,7 @@ async function loadAnalytics() {
 // ── Analytics (full-page) ──
 async function loadAnalyticsFull() {
   try {
-    const data = await (await fetch(WORKER + "/stats")).json();
+    const data = await (await fetch(WORKER + "/stats", { credentials: "include" })).json();
     document.getElementById("fp-total").textContent = data.total || 0;
     const days = data.days || {};
     const today = new Date().toISOString().slice(0, 10);
@@ -192,7 +212,6 @@ function renderAnalytics(data, totalId, chartId, pagesId) {
       Math.round((count / maxVal) * (chartH - 14)),
       count > 0 ? 4 : 2,
     );
-    // date/count come from our own backend — still use DOM API as defence-in-depth
     const col = document.createElement("div");
     col.className = "bar-col";
     const bar = document.createElement("div");
@@ -217,12 +236,11 @@ function renderAnalytics(data, totalId, chartId, pagesId) {
     return;
   }
   sorted.forEach(([page, count]) => {
-    // fix #1: DOM API instead of innerHTML to prevent Stored XSS
     const row = document.createElement("div");
     row.className = "page-row";
     const nameSpan = document.createElement("span");
     nameSpan.className = "page-name";
-    nameSpan.textContent = page; // attacker-controlled — MUST use textContent
+    nameSpan.textContent = page;
     const countSpan = document.createElement("span");
     countSpan.className = "page-count";
     countSpan.textContent = String(count);
@@ -340,14 +358,13 @@ function renderFpNotesList() {
     const n = notes[id];
     const div = document.createElement("div");
     div.className = "note-item" + (id === currentNoteId ? " active" : "");
-    // Safe DOM construction — no innerHTML with user data (fix #2 & #4)
     const info = document.createElement("div");
     info.className = "note-item-info";
     info.style.cursor = "pointer";
     info.addEventListener("click", () => openNote(id));
     const titleDiv = document.createElement("div");
     titleDiv.className = "note-item-title";
-    titleDiv.textContent = n.title || "Untitled"; // fix #2: textContent not innerHTML
+    titleDiv.textContent = n.title || "Untitled";
     const dateDiv = document.createElement("div");
     dateDiv.className = "note-item-date";
     dateDiv.textContent = new Date(n.date).toLocaleDateString();
@@ -360,7 +377,7 @@ function renderFpNotesList() {
     delBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       deleteNote(id);
-    }); // fix #4
+    });
     div.appendChild(info);
     div.appendChild(delBtn);
     list.appendChild(div);
@@ -383,7 +400,6 @@ function renderSidebarNotesList() {
     const div = document.createElement("div");
     div.className = "note-item";
     div.style.cursor = "pointer";
-    // Safe DOM construction (fix #2)
     const sbInfo = document.createElement("div");
     sbInfo.className = "note-item-info";
     const sbTitle = document.createElement("div");
@@ -398,7 +414,7 @@ function renderSidebarNotesList() {
     div.addEventListener("click", () => {
       openFull("notes");
       setTimeout(() => openNote(id), 100);
-    }); // fix #4
+    });
     list.appendChild(div);
   });
 }
@@ -413,7 +429,7 @@ function openNote(id) {
   currentNoteId = id;
   const n = notes[id];
   document.getElementById("note-title").value = n.title || "";
-  if (quill) quill.root.innerHTML = DOMPurify.sanitize(n.content || ""); // fix #3
+  if (quill) quill.root.innerHTML = DOMPurify.sanitize(n.content || "");
   document.getElementById("note-saved").textContent = "";
   renderFpNotesList();
 }
@@ -423,7 +439,7 @@ function saveCurrentNote() {
     document.getElementById("note-title").value || "Untitled";
   notes[currentNoteId].content = quill
     ? DOMPurify.sanitize(quill.root.innerHTML)
-    : ""; // fix #3
+    : "";
   notes[currentNoteId].date = Date.now();
   saveNotesToStorage();
   renderFpNotesList();
@@ -439,7 +455,7 @@ function deleteNote(id) {
   if (currentNoteId === id) {
     currentNoteId = null;
     document.getElementById("note-title").value = "";
-    if (quill) quill.root.innerHTML = ""; // safe: no user data
+    if (quill) quill.root.innerHTML = "";
   }
   renderFpNotesList();
   renderSidebarNotesList();
@@ -538,8 +554,8 @@ async function refreshDeathData() {
   setDeathLoading(true);
   try {
     const [statsRes, notifsRes] = await Promise.all([
-      fetch(WORKER + "/death/stats"),
-      fetch(WORKER + "/death/notifications?limit=100")
+      fetch(WORKER + "/death/stats", { credentials: "include" }),
+      fetch(WORKER + "/death/notifications?limit=100", { credentials: "include" })
     ]);
 
     if (statsRes.ok) {
@@ -764,7 +780,7 @@ function setDeathFilter(tag, el) {
 async function deleteOldDeathNotifs() {
   if (!confirm("Delete notifications older than 7 days?")) return;
   try {
-    const res = await fetch(WORKER + "/death/notifications?older_than=604800", { method: "DELETE" });
+    const res = await fetch(WORKER + "/death/notifications?older_than=604800", { method: "DELETE", credentials: "include" });
     const data = await res.json();
     alert(`Deleted ${data.deleted} old notifications.`);
     await refreshDeathData();
