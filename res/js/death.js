@@ -1,39 +1,73 @@
 const WORKER = "https://locamartin-auth.locamartin.workers.dev";
+
+// Global Application & UI State
 let sidebarOpen = false;
 let analyticsLoaded = false;
-let deathTimer = null,
-  deathTimerFull = null;
+let deathTimer = null;
+let deathTimerFull = null;
 let quill = null;
-let notes = {}; // { id: {title, content, date} }
+let notes = {};
 let currentNoteId = null;
 
-// ── Init Quill ──
-window.addEventListener("load", () => {
-  quill = new Quill("#quill-editor", {
-    theme: "snow",
-    placeholder: "Write your note here…",
-    modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline", "strike"],
-        [{ color: [] }, { background: [] }],
-        [{ list: "ordered" }, { list: "bullet" }],
-        ["blockquote", "code-block"],
-        ["link"],
-        ["clean"],
-      ],
-    },
+// Global Death Pipeline Telemetry State
+let deathFilter = "";
+let deathItems = [];
+let deathStats = null;
+let deathLoaded = false;
+let deathRefreshTimer = null;
+
+// Workflow Display Mapping
+const DEATH_WF_NAMES = {
+  "bbscope.yml": "BBScope Fetcher",
+  "nuclei_header_bbp.yml": "Nuclei BBP",
+  "nuclei_header_sub.yml": "Nuclei Sub",
+  "subrecon.yml": "Subrecon",
+};
+
+// Initialize Quill Editor on DOM Load
+document.addEventListener("DOMContentLoaded", () => {
+  const quillContainer = document.getElementById("quill-editor");
+  if (quillContainer && typeof Quill !== "undefined") {
+    quill = new Quill("#quill-editor", {
+      theme: "snow",
+      placeholder: "Write your note here...",
+    });
+  }
+
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const u = document.getElementById("username")?.value;
+      const p = document.getElementById("password")?.value;
+      if (u && p) {
+        await loginWithPassword(u, p);
+      }
+    });
+  }
+
+  const togglePw = document.getElementById("togglePassword");
+  if (togglePw) {
+    togglePw.addEventListener("click", () => {
+      const pwInput = document.getElementById("password");
+      if (pwInput) {
+        const isPassword = pwInput.getAttribute("type") === "password";
+        pwInput.setAttribute("type", isPassword ? "text" : "password");
+      }
+    });
+  }
+
+  verifySession().then((isValid) => {
+    if (isValid) {
+      showApp();
+    }
   });
-  loadNotesFromStorage();
 });
 
-// ── Username/password session login ──
+// ── Auth & Session Management ──
 async function verifySession() {
   try {
-    const res = await fetch(WORKER + "/session", {
-      method: "GET",
-      credentials: "include",
-    });
+    const res = await fetch(`${WORKER}/session`, { method: "GET", credentials: "include" });
     return res.ok && (await res.json()).success === true;
   } catch {
     return false;
@@ -48,10 +82,11 @@ function showApp() {
   trackPage();
   loadNotesFromStorage();
   renderSidebarNotesList();
+  refreshDeathData();
 }
 
 async function loginWithPassword(username, password) {
-  const res = await fetch(WORKER + "/login", { // Changed /verify to /login
+  const res = await fetch(`${WORKER}/login`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -68,78 +103,12 @@ async function loginWithPassword(username, password) {
 }
 
 async function logout() {
-  await fetch(WORKER + "/logout", {
-    method: "POST",
-    credentials: "include",
-  }).catch(() => {});
+  await fetch(`${WORKER}/logout`, { method: "POST", credentials: "include" }).catch(() => {});
   window.location.reload();
 }
 
-window.addEventListener("DOMContentLoaded", async () => {
-  // ── 1. Password Visibility Toggle ──
-  const toggleBtn = document.getElementById("togglePassword");
-  const passwordInput = document.getElementById("password");
-
-  if (toggleBtn && passwordInput) {
-    toggleBtn.addEventListener("click", () => {
-      const isPassword = passwordInput.getAttribute("type") === "password";
-      passwordInput.setAttribute("type", isPassword ? "text" : "password");
-
-      // Toggle Feather Eye / Eye-Off Icons
-      const eyeIcon = toggleBtn.querySelector(".eye-icon");
-      if (eyeIcon) {
-        if (isPassword) {
-          // Eye Off Icon
-          eyeIcon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`;
-        } else {
-          // Eye On Icon
-          eyeIcon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
-        }
-      }
-    });
-  }
-
-  // ── 2. Login Form Handling ──
-  const form = document.getElementById("login-form");
-  if (form) {
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const button = form.querySelector("button[type=submit]");
-      const error = document.getElementById("login-error");
-      
-      if (error) error.textContent = "";
-      if (button) {
-        button.disabled = true;
-        button.textContent = "Signing in…";
-      }
-
-      try {
-        await loginWithPassword(
-          document.getElementById("username").value,
-          document.getElementById("password").value
-        );
-      } catch (err) {
-        if (error) {
-          error.textContent = err.message || "Login failed. Please try again.";
-        }
-      } finally {
-        if (button) {
-          button.disabled = false;
-          button.textContent = "Sign in";
-        }
-      }
-    });
-  }
-
-  // ── 3. Session Verification ──
-  if (typeof verifySession === "function" && await verifySession()) {
-    showApp();
-  }
-});
-
 function trackPage() {
-  fetch(WORKER + "/track", {
+  fetch(`${WORKER}/track`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -147,120 +116,130 @@ function trackPage() {
   }).catch(() => {});
 }
 
-// ── Sidebar ──
+// ── Navigation & Sidebar Controls ──
 function toggleSidebar() {
   sidebarOpen ? closeSidebar() : openSidebar();
 }
+
 function openSidebar() {
   sidebarOpen = true;
-  document.getElementById("overlay").classList.add("open");
-  document.getElementById("sidebar").classList.add("open");
+  const overlay = document.getElementById("overlay");
+  const sidebar = document.getElementById("sidebar");
+  if (overlay) overlay.classList.add("open");
+  if (sidebar) sidebar.classList.add("open");
   if (!analyticsLoaded) {
     loadAnalytics();
     analyticsLoaded = true;
   }
 }
+
 function closeSidebar() {
   sidebarOpen = false;
-  document.getElementById("overlay").classList.remove("open");
-  document.getElementById("sidebar").classList.remove("open");
+  const overlay = document.getElementById("overlay");
+  const sidebar = document.getElementById("sidebar");
+  if (overlay) overlay.classList.remove("open");
+  if (sidebar) sidebar.classList.remove("open");
 }
 
-// ── Panel switch (sidebar) ──
 function showPanel(name, evt) {
   document.querySelectorAll(".panel").forEach((p) => {
     p.style.display = "none";
     p.classList.remove("active");
   });
   document.querySelectorAll(".nav-item").forEach((b) => b.classList.remove("active"));
-  const panel = document.getElementById("panel-" + name);
-  panel.style.display = "block";
-  panel.classList.add("active");
-  if (evt) evt.currentTarget.classList.add("active");
-  if (name === "analytics" && !analyticsLoaded) { loadAnalytics(); analyticsLoaded = true; }
+  
+  const panel = document.getElementById(`panel-${name}`);
+  if (panel) {
+    panel.style.display = "block";
+    panel.classList.add("active");
+  }
+  if (evt && evt.currentTarget) evt.currentTarget.classList.add("active");
+  
+  if (name === "analytics" && !analyticsLoaded) {
+    loadAnalytics();
+    analyticsLoaded = true;
+  }
   if (name === "death-pipeline") loadDeathDashboard();
 }
 
-// ── Full-page open/close ──
 function openFull(name) {
   closeSidebar();
-  document.getElementById("fp-" + name).classList.add("open");
-  if (name === "analytics")       loadAnalyticsFull();
-  if (name === "notes")           { loadNotesFromStorage(); renderFpNotesList(); }
-  if (name === "portfolio")       loadPortfolioFields();
-  if (name === "death-pipeline")  loadDeathDashboard();
+  const fp = document.getElementById(`fp-${name}`);
+  if (fp) fp.classList.add("open");
+  
+  if (name === "analytics") loadAnalyticsFull();
+  if (name === "notes") { loadNotesFromStorage(); renderFpNotesList(); }
+  if (name === "portfolio") loadPortfolioFields();
+  if (name === "death-pipeline") loadDeathDashboard();
   document.body.style.overflow = "hidden";
 }
 
 function closeFull(name) {
-  document.getElementById("fp-" + name).classList.remove("open");
+  const fp = document.getElementById(`fp-${name}`);
+  if (fp) fp.classList.remove("open");
   document.body.style.overflow = "";
 }
 
-// ESC key closes any open full-page panel
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    document
-      .querySelectorAll(".fullpage-panel.open")
-      .forEach((p) => p.classList.remove("open"));
+    document.querySelectorAll(".fullpage-panel.open").forEach((p) => p.classList.remove("open"));
     document.body.style.overflow = "";
   }
 });
 
-// ── Analytics (sidebar) ──
+// ── Analytics ──
 async function loadAnalytics() {
-  document.getElementById("loading-msg").style.display = "block";
-  document.getElementById("analytics-content").style.display = "none";
-  document.getElementById("error-msg").style.display = "none";
+  const loading = document.getElementById("loading-msg");
+  const content = document.getElementById("analytics-content");
+  const error = document.getElementById("error-msg");
+  
+  if (loading) loading.style.display = "block";
+  if (content) content.style.display = "none";
+  if (error) error.style.display = "none";
+  
   try {
-    const data = await (await fetch(WORKER + "/stats", { credentials: "include" })).json();
+    const data = await (await fetch(`${WORKER}/stats`, { credentials: "include" })).json();
     renderAnalytics(data, "total-views", "chart", "top-pages");
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("analytics-content").style.display = "block";
+    if (loading) loading.style.display = "none";
+    if (content) content.style.display = "block";
   } catch (e) {
-    document.getElementById("loading-msg").style.display = "none";
-    document.getElementById("error-msg").style.display = "block";
+    if (loading) loading.style.display = "none";
+    if (error) error.style.display = "block";
   }
 }
 
-// ── Analytics (full-page) ──
 async function loadAnalyticsFull() {
   try {
-    const data = await (await fetch(WORKER + "/stats", { credentials: "include" })).json();
-    document.getElementById("fp-total").textContent = data.total || 0;
+    const data = await (await fetch(`${WORKER}/stats`, { credentials: "include" })).json();
+    setDeathEl("fp-total", data.total || 0);
     const days = data.days || {};
     const today = new Date().toISOString().slice(0, 10);
-    document.getElementById("fp-today").textContent = days[today] || 0;
-    document.getElementById("fp-week").textContent = Object.values(days).reduce(
-      (a, b) => a + b,
-      0,
-    );
-    document.getElementById("fp-pages").textContent = Object.keys(
-      data.topPages || {},
-    ).length;
+    setDeathEl("fp-today", days[today] || 0);
+    setDeathEl("fp-week", Object.values(days).reduce((a, b) => a + b, 0));
+    setDeathEl("fp-pages", Object.keys(data.topPages || {}).length);
     renderAnalytics(data, null, "fp-chart", "fp-top-pages");
   } catch (e) {}
 }
 
 function renderAnalytics(data, totalId, chartId, pagesId) {
-  if (totalId) document.getElementById(totalId).textContent = data.total || 0;
+  if (totalId) setDeathEl(totalId, data.total || 0);
   const chart = document.getElementById(chartId);
+  if (!chart) return;
   chart.innerHTML = "";
+  
   const days = data.days || {};
   const vals = Object.values(days);
   const maxVal = Math.max(...vals, 1);
   const chartH = chart.offsetHeight || 80;
+  
   Object.entries(days).forEach(([date, count]) => {
-    const h = Math.max(
-      Math.round((count / maxVal) * (chartH - 14)),
-      count > 0 ? 4 : 2,
-    );
+    const h = Math.max(Math.round((count / maxVal) * (chartH - 14)), count > 0 ? 4 : 2);
     const col = document.createElement("div");
     col.className = "bar-col";
     const bar = document.createElement("div");
     bar.className = "bar";
-    bar.style.height = h + "px";
-    bar.title = count + " views";
+    bar.style.height = `${h}px`;
+    bar.title = `${count} views`;
     const lbl = document.createElement("div");
     lbl.className = "bar-label";
     lbl.textContent = date.slice(5);
@@ -268,14 +247,13 @@ function renderAnalytics(data, totalId, chartId, pagesId) {
     col.appendChild(lbl);
     chart.appendChild(col);
   });
+
   const pagesDiv = document.getElementById(pagesId);
+  if (!pagesDiv) return;
   pagesDiv.innerHTML = "";
-  const sorted = Object.entries(data.topPages || {}).sort(
-    (a, b) => b[1] - a[1],
-  );
+  const sorted = Object.entries(data.topPages || {}).sort((a, b) => b[1] - a[1]);
   if (!sorted.length) {
-    pagesDiv.innerHTML =
-      '<p style="color:rgba(255,255,255,0.28);font-size:0.82rem">No data yet.</p>';
+    pagesDiv.innerHTML = '<p style="color:rgba(255,255,255,0.28);font-size:0.82rem">No data yet.</p>';
     return;
   }
   sorted.forEach(([page, count]) => {
@@ -293,108 +271,23 @@ function renderAnalytics(data, totalId, chartId, pagesId) {
   });
 }
 
-// ── Death (sidebar) ──
-function calcDeath() {
-  _calcDeath(
-    "dob",
-    "sex",
-    "lifestyle",
-    "death-result",
-    "death-date",
-    "years-left",
-    "countdown",
-    deathTimer,
-    (t) => (deathTimer = t),
-  );
-}
-function calcDeathFull() {
-  _calcDeath(
-    "fp-dob",
-    "fp-sex",
-    "fp-lifestyle",
-    "fp-death-result",
-    "fp-death-date",
-    "fp-years-left",
-    "fp-countdown",
-    deathTimerFull,
-    (t) => (deathTimerFull = t),
-  );
-}
-
-function _calcDeath(
-  dobId,
-  sexId,
-  lsId,
-  resId,
-  dateId,
-  ylId,
-  cdId,
-  timer,
-  setTimer,
-) {
-  const dob = document.getElementById(dobId).value;
-  const sex = document.getElementById(sexId).value;
-  const lifestyle = document.getElementById(lsId).value;
-  if (!dob) {
-    alert("Please enter your date of birth.");
-    return;
-  }
-  const baseLife = { male: 74, female: 80 };
-  const lsAdj = { healthy: 5, average: 0, unhealthy: -8 };
-  const expectancy = baseLife[sex] + lsAdj[lifestyle];
-  const birth = new Date(dob);
-  const deathDate = new Date(birth);
-  deathDate.setFullYear(birth.getFullYear() + expectancy);
-  const now = new Date();
-  const msLeft = deathDate - now;
-  if (msLeft <= 0) {
-    document.getElementById(dateId).textContent = "Date has passed";
-    document.getElementById(ylId).textContent = "";
-    document.getElementById(cdId).innerHTML = "";
-  } else {
-    const yearsLeft = (msLeft / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1);
-    document.getElementById(dateId).textContent = deathDate.toLocaleDateString(
-      "en-GB",
-      { day: "numeric", month: "long", year: "numeric" },
-    );
-    document.getElementById(ylId).textContent = `~${yearsLeft} years remaining`;
-    if (timer) clearInterval(timer);
-    _updateCd(deathDate, cdId);
-    setTimer(setInterval(() => _updateCd(deathDate, cdId), 1000));
-  }
-  document.getElementById(resId).style.display = "block";
-}
-
-function _updateCd(target, cdId) {
-  const diff = target - new Date();
-  if (diff <= 0) return;
-  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const s = Math.floor((diff % (1000 * 60)) / 1000);
-  document.getElementById(cdId).innerHTML = `
-    <div class="cd-box"><div class="cd-num">${d.toLocaleString()}</div><div class="cd-label">Days</div></div>
-    <div class="cd-box"><div class="cd-num">${h}</div><div class="cd-label">Hours</div></div>
-    <div class="cd-box"><div class="cd-num">${m}</div><div class="cd-label">Mins</div></div>
-    <div class="cd-box"><div class="cd-num">${s}</div><div class="cd-label">Secs</div></div>`;
-}
-
-// ── Notes ──
+// ── Notes Scratchpad Module ──
 function loadNotesFromStorage() {
   const raw = localStorage.getItem("lm_notes_v2");
   notes = raw ? JSON.parse(raw) : {};
 }
+
 function saveNotesToStorage() {
   localStorage.setItem("lm_notes_v2", JSON.stringify(notes));
 }
 
 function renderFpNotesList() {
   const list = document.getElementById("fp-notes-list");
+  if (!list) return;
   list.innerHTML = "";
   const ids = Object.keys(notes).sort((a, b) => notes[b].date - notes[a].date);
   if (!ids.length) {
-    list.innerHTML =
-      '<p style="font-size:0.8rem;color:var(--muted)">No notes yet. Click New.</p>';
+    list.innerHTML = '<p style="font-size:0.8rem;color:var(--muted)">No notes yet. Click New.</p>';
     return;
   }
   ids.forEach((id) => {
@@ -405,37 +298,38 @@ function renderFpNotesList() {
     info.className = "note-item-info";
     info.style.cursor = "pointer";
     info.addEventListener("click", () => openNote(id));
+    
     const titleDiv = document.createElement("div");
     titleDiv.className = "note-item-title";
     titleDiv.textContent = n.title || "Untitled";
     const dateDiv = document.createElement("div");
     dateDiv.className = "note-item-date";
     dateDiv.textContent = new Date(n.date).toLocaleDateString();
+    
     info.appendChild(titleDiv);
     info.appendChild(dateDiv);
+    
     const delBtn = document.createElement("button");
     delBtn.className = "note-item-del";
-    delBtn.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+    delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
     delBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       deleteNote(id);
     });
+    
     div.appendChild(info);
     div.appendChild(delBtn);
     list.appendChild(div);
   });
 }
+
 function renderSidebarNotesList() {
   const list = document.getElementById("sidebar-notes-list");
   if (!list) return;
   list.innerHTML = "";
-  const ids = Object.keys(notes)
-    .sort((a, b) => notes[b].date - notes[a].date)
-    .slice(0, 5);
+  const ids = Object.keys(notes).sort((a, b) => notes[b].date - notes[a].date).slice(0, 5);
   if (!ids.length) {
-    list.innerHTML =
-      '<p style="font-size:0.78rem;color:var(--muted)">No notes yet.</p>';
+    list.innerHTML = '<p style="font-size:0.78rem;color:var(--muted)">No notes yet.</p>';
     return;
   }
   ids.forEach((id) => {
@@ -461,118 +355,95 @@ function renderSidebarNotesList() {
     list.appendChild(div);
   });
 }
+
 function newNote() {
-  const id = "note_" + Date.now();
+  const id = `note_${Date.now()}`;
   notes[id] = { title: "Untitled Note", content: "", date: Date.now() };
   saveNotesToStorage();
   openNote(id);
   renderFpNotesList();
 }
+
 function openNote(id) {
   currentNoteId = id;
   const n = notes[id];
-  document.getElementById("note-title").value = n.title || "";
-  if (quill) quill.root.innerHTML = DOMPurify.sanitize(n.content || "");
-  document.getElementById("note-saved").textContent = "";
+  if (!n) return;
+  const titleEl = document.getElementById("note-title");
+  if (titleEl) titleEl.value = n.title || "";
+  if (quill) {
+    quill.root.innerHTML = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(n.content || "") : (n.content || "");
+  }
+  setDeathEl("note-saved", "");
   renderFpNotesList();
 }
+
 function saveCurrentNote() {
   if (!currentNoteId) return;
-  notes[currentNoteId].title =
-    document.getElementById("note-title").value || "Untitled";
-  notes[currentNoteId].content = quill
-    ? DOMPurify.sanitize(quill.root.innerHTML)
-    : "";
+  const titleEl = document.getElementById("note-title");
+  notes[currentNoteId].title = titleEl ? titleEl.value || "Untitled" : "Untitled";
+  const rawContent = quill ? quill.root.innerHTML : "";
+  notes[currentNoteId].content = typeof DOMPurify !== "undefined" ? DOMPurify.sanitize(rawContent) : rawContent;
   notes[currentNoteId].date = Date.now();
   saveNotesToStorage();
   renderFpNotesList();
   renderSidebarNotesList();
+  
   const c = document.getElementById("note-saved");
-  c.textContent = "✓ Saved";
-  setTimeout(() => (c.textContent = ""), 2000);
+  if (c) {
+    c.textContent = "✓ Saved";
+    setTimeout(() => (c.textContent = ""), 2000);
+  }
 }
+
 function deleteNote(id) {
   if (!confirm("Delete this note?")) return;
   delete notes[id];
   saveNotesToStorage();
   if (currentNoteId === id) {
     currentNoteId = null;
-    document.getElementById("note-title").value = "";
+    const titleEl = document.getElementById("note-title");
+    if (titleEl) titleEl.value = "";
     if (quill) quill.root.innerHTML = "";
   }
   renderFpNotesList();
   renderSidebarNotesList();
 }
 
-// ── Portfolio editor ──
+// ── Portfolio Editor ──
 function loadPortfolioFields() {
   const d = JSON.parse(localStorage.getItem("lm_portfolio") || "{}");
-  [
-    "name",
-    "title",
-    "summary",
-    "github",
-    "linkedin",
-    "medium",
-    "proof",
-    "sk-lang",
-    "sk-tools",
-    "sk-vuln",
-  ].forEach((k) => {
-    const el = document.getElementById("pe-" + k);
+  ["name", "title", "summary", "github", "linkedin", "medium", "proof", "sk-lang", "sk-tools", "sk-vuln"].forEach((k) => {
+    const el = document.getElementById(`pe-${k}`);
     if (el && d[k]) el.value = d[k];
   });
 }
+
 function savePortfolio() {
   const d = {};
-  [
-    "name",
-    "title",
-    "summary",
-    "github",
-    "linkedin",
-    "medium",
-    "proof",
-    "sk-lang",
-    "sk-tools",
-    "sk-vuln",
-  ].forEach((k) => {
-    const el = document.getElementById("pe-" + k);
+  ["name", "title", "summary", "github", "linkedin", "medium", "proof", "sk-lang", "sk-tools", "sk-vuln"].forEach((k) => {
+    const el = document.getElementById(`pe-${k}`);
     if (el) d[k] = el.value;
   });
   localStorage.setItem("lm_portfolio", JSON.stringify(d));
   const c = document.getElementById("pe-saved");
-  c.textContent = "✓ Saved to browser";
-  setTimeout(() => (c.textContent = ""), 2500);
+  if (c) {
+    c.textContent = "✓ Saved to browser";
+    setTimeout(() => (c.textContent = ""), 2500);
+  }
 }
+
 function exportPortfolio() {
   const d = JSON.parse(localStorage.getItem("lm_portfolio") || "{}");
   navigator.clipboard.writeText(JSON.stringify(d, null, 2)).then(() => {
     const c = document.getElementById("pe-saved");
-    c.textContent = "✓ Copied to clipboard";
-    setTimeout(() => (c.textContent = ""), 2500);
+    if (c) {
+      c.textContent = "✓ Copied to clipboard";
+      setTimeout(() => (c.textContent = ""), 2500);
+    }
   });
 }
 
-// ══════════════════════════════════════════════════════════
-// DEATH PROJECT PANEL
-// ══════════════════════════════════════════════════════════
-
-let deathFilter     = "";         // active tag filter
-let deathItems      = [];         // cached notification items
-let deathStats      = null;       // cached stats
-let deathLoaded     = false;
-let deathRefreshTimer = null;
-
-// Workflow display names
-const DEATH_WF_NAMES = {
-  "bbscope.yml":           "BBScope Fetcher",
-  "nuclei_header_bbp.yml": "Nuclei BBP",
-  "nuclei_header_sub.yml": "Nuclei Sub",
-  "subrecon.yml":          "Subrecon",
-};
-
-// ── Entry point called when full-page panel opens ──
+// ── DEATH Recon Pipeline Module ──
 async function loadDeathDashboard() {
   if (deathLoaded && deathStats) {
     renderDeathStats(deathStats);
@@ -581,7 +452,6 @@ async function loadDeathDashboard() {
   }
   await refreshDeathData();
 
-  // Auto-refresh every 60 seconds while panel is open
   clearInterval(deathRefreshTimer);
   deathRefreshTimer = setInterval(() => {
     const panel = document.getElementById("fp-death-pipeline");
@@ -597,8 +467,8 @@ async function refreshDeathData() {
   setDeathLoading(true);
   try {
     const [statsRes, notifsRes] = await Promise.all([
-      fetch(WORKER + "/death/stats", { credentials: "include" }),
-      fetch(WORKER + "/death/notifications?limit=100", { credentials: "include" })
+      fetch(`${WORKER}/death/stats`, { credentials: "include" }),
+      fetch(`${WORKER}/death/notifications?limit=100`, { credentials: "include" }),
     ]);
 
     if (statsRes.ok) {
@@ -629,36 +499,42 @@ function setDeathLoading(on) {
 
 function updateDeathLastUpdated() {
   const el = document.getElementById("death-last-updated");
-  if (el) el.textContent = "Updated " + new Date().toLocaleTimeString();
+  if (el) el.textContent = `Updated ${new Date().toLocaleTimeString()}`;
 }
 
-// ── Render stats section ──
 function renderDeathStats(s) {
   if (!s) return;
-  const scope    = s.scope    ?? {};
+  const scope = s.scope ?? {};
   const findings = s.findings ?? {};
-  const notifs   = s.notifications ?? {};
+  const notifs = s.notifications ?? {};
 
-  // Stat cards
-  setDeathEl("dstat-bbp-domains",   scope.bbpDomains   ?? 0);
+  setDeathEl("dstat-bbp-domains", scope.bbpDomains ?? 0);
   setDeathEl("dstat-bbp-wildcards", scope.bbpWildcards ?? 0);
-  setDeathEl("dstat-bbp-ips",       scope.bbpIPs       ?? 0);
-  setDeathEl("dstat-subdomains",    scope.subdomains   ?? 0);
-  setDeathEl("dstat-findings",      findings.total     ?? 0);
-  setDeathEl("dstat-findings-bbp",  findings.bbp       ?? 0);
-  setDeathEl("dstat-errors",        notifs.errors      ?? 0);
-  setDeathEl("dstat-notifs",        notifs.total       ?? 0);
+  setDeathEl("dstat-bbp-ips", scope.bbpIPs ?? 0);
+  setDeathEl("dstat-subdomains", scope.subdomains ?? 0);
+  setDeathEl("dstat-findings", findings.total ?? 0);
+  setDeathEl("dstat-findings-bbp", findings.bbp ?? 0);
+  setDeathEl("dstat-errors", notifs.errors ?? 0);
+  setDeathEl("dstat-notifs", notifs.total ?? 0);
 
-  // Progress bars
   const bbpTotal = scope.bbpDomains || 1;
   const subTotal = scope.subdomains || 1;
-  setDeathBar("dbar-bbp-processed",  scope.bbpProcessed ?? 0, bbpTotal);
-  setDeathBar("dbar-sub-processed",  scope.subProcessed ?? 0, subTotal);
+  setDeathBar("dbar-bbp-processed", scope.bbpProcessed ?? 0, bbpTotal);
+  setDeathBar("dbar-sub-processed", scope.subProcessed ?? 0, subTotal);
   setDeathEl("dbar-bbp-count", `${(scope.bbpProcessed ?? 0).toLocaleString()} / ${bbpTotal.toLocaleString()}`);
   setDeathEl("dbar-sub-count", `${(scope.subProcessed ?? 0).toLocaleString()} / ${subTotal.toLocaleString()}`);
 
-  // Workflow run cards
   renderDeathRunCards(s.runs ?? []);
+}
+
+function renderDeathSidebarStats(s) {
+  if (!s) return;
+  const scope = s.scope ?? {};
+  const findings = s.findings ?? {};
+  setDeathEl("sidebar-dstat-domains", scope.bbpDomains ?? 0);
+  setDeathEl("sidebar-dstat-subs", scope.subdomains ?? 0);
+  setDeathEl("sidebar-dstat-findings", findings.total ?? 0);
+  setDeathEl("sidebar-dstat-processed", scope.bbpProcessed ?? 0);
 }
 
 function setDeathEl(id, val) {
@@ -668,7 +544,7 @@ function setDeathEl(id, val) {
 
 function setDeathBar(id, val, total) {
   const el = document.getElementById(id);
-  if (el) el.style.width = (Math.min((val / total) * 100, 100).toFixed(1)) + "%";
+  if (el) el.style.width = `${Math.min((val / total) * 100, 100).toFixed(1)}%`;
 }
 
 function renderDeathRunCards(runs) {
@@ -682,169 +558,93 @@ function renderDeathRunCards(runs) {
   }
 
   for (const r of runs) {
-    const name       = DEATH_WF_NAMES[r.workflow] ?? r.workflow;
-    const conclusion = r.conclusion ?? r.status ?? "unknown";
-    const cssClass   = r.status === "in_progress" ? "in_progress"
-                     : r.conclusion === "success"   ? "success"
-                     : r.conclusion === "failure"   ? "failure"
-                     : r.conclusion === "cancelled" ? "cancelled"
-                     : "unknown";
-
-    const elapsed = r.updated_at
-      ? timeAgo(new Date(r.updated_at))
-      : "";
+    const name = DEATH_WF_NAMES[r.workflow] ?? r.workflow;
+    const cssClass =
+      r.status === "in_progress"
+        ? "in_progress"
+        : r.conclusion === "success"
+        ? "success"
+        : r.conclusion === "cancelled"
+        ? "cancelled"
+        : "failure";
 
     const card = document.createElement("a");
     card.className = `death-run-card ${cssClass}`;
-    card.href      = r.html_url ?? "#";
-    card.target    = "_blank";
-    card.rel       = "noopener";
-
-    const label = r.status === "in_progress" ? "Running"
-                : (r.conclusion ?? "Unknown");
+    if (r.url) card.href = r.url;
+    card.target = "_blank";
+    card.rel = "noopener noreferrer";
 
     card.innerHTML = `
       <div class="death-run-name">
-        <div class="death-run-dot ${cssClass}"></div>
-        ${escHtml(name)}
+        <span class="death-run-dot ${cssClass}"></span>
+        ${name}
       </div>
-      <div class="death-run-meta">${escHtml(label)} · ${escHtml(elapsed)}</div>
-      <div class="death-run-number">#${r.run_number ?? "?"}</div>`;
+      <div class="death-run-meta">${r.status === "in_progress" ? "In Progress" : r.conclusion ?? r.status}</div>
+      <div class="death-run-number">#${r.run_number ?? ""}</div>
+    `;
     container.appendChild(card);
   }
 }
 
-// ── Render notification feed ──
-function renderDeathFeed(items) {
-  const feed = document.getElementById("death-feed");
-  if (!feed) return;
-
-  const filtered = deathFilter
-    ? items.filter(i => i.tag === deathFilter)
-    : items;
-
-  feed.innerHTML = "";
-
-  if (!filtered.length) {
-    feed.innerHTML = '<div class="death-empty">No notifications yet.<br>Run a workflow to see logs here.</div>';
-    return;
-  }
-
-  for (const item of filtered) {
-    const entry = document.createElement("div");
-    entry.className = `death-entry ${item.type ?? "info"}`;
-
-    const time   = item.ts ? new Date(item.ts * 1000).toLocaleString() : "";
-    const typeBadge = item.type && item.type !== "info"
-      ? `<span class="death-entry-type-badge ${item.type}">${item.type.toUpperCase()}</span>`
-      : "";
-
-    // Build top row safely
-    const top = document.createElement("div");
-    top.className = "death-entry-top";
-
-    const tagPill = document.createElement("span");
-    tagPill.className = `death-tag-pill ${item.tag ?? "general"}`;
-    tagPill.textContent = item.tag ?? "general";
-    top.appendChild(tagPill);
-
-    if (item.type && item.type !== "info") {
-      const badge = document.createElement("span");
-      badge.className = `death-entry-type-badge ${item.type}`;
-      badge.textContent = item.type.toUpperCase();
-      top.appendChild(badge);
-    }
-
-    const timeEl = document.createElement("span");
-    timeEl.className = "death-entry-time";
-    timeEl.textContent = time;
-    top.appendChild(timeEl);
-
-    // Text body — highlight URLs and domain findings
-    const textEl = document.createElement("div");
-    textEl.className = "death-entry-text";
-    textEl.textContent = item.text ?? "";
-
-    entry.appendChild(top);
-    entry.appendChild(textEl);
-    feed.appendChild(entry);
-  }
-}
-
-// ── Sidebar preview ──
-function renderDeathSidebarStats(s) {
-  const scope    = s?.scope    ?? {};
-  const findings = s?.findings ?? {};
-
-  const mn = (id, v) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = typeof v === "number" ? v.toLocaleString() : v;
-  };
-  mn("sidebar-dstat-domains",   scope.bbpDomains  ?? 0);
-  mn("sidebar-dstat-subs",      scope.subdomains  ?? 0);
-  mn("sidebar-dstat-findings",  findings.total    ?? 0);
-  mn("sidebar-dstat-processed", scope.bbpProcessed ?? 0);
-}
-
-function renderDeathSidebarFeed(items) {
-  const feed = document.getElementById("sidebar-death-feed");
-  if (!feed) return;
-  feed.innerHTML = "";
-
-  const top5 = items.slice(0, 5);
-  if (!top5.length) {
-    feed.innerHTML = '<div style="font-size:0.75rem;color:var(--muted)">No notifications yet.</div>';
-    return;
-  }
-
-  for (const item of top5) {
-    const div = document.createElement("div");
-    div.className = `death-mini-entry ${item.type ?? "info"}`;
-    div.textContent = item.text?.split("\n")[0] ?? "";
-    div.title = item.text ?? "";
-    div.style.cursor = "pointer";
-    div.addEventListener("click", () => { openFull("death-pipeline"); });
-    feed.appendChild(div);
-  }
-}
-
-// ── Filter buttons ──
-function setDeathFilter(tag, el) {
-  deathFilter = tag;
-  document.querySelectorAll(".death-filter-btn").forEach(b => b.classList.remove("active"));
-  if (el) {
-    el.classList.add("active");
-    if (tag) el.classList.add(tag);
-  }
+function setDeathFilter(filter, btn) {
+  deathFilter = filter;
+  document.querySelectorAll(".death-feed-filters .death-filter-btn").forEach((b) => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
   renderDeathFeed(deathItems);
 }
 
-// ── Delete old notifications ──
-async function deleteOldDeathNotifs() {
-  if (!confirm("Delete notifications older than 7 days?")) return;
-  try {
-    const res = await fetch(WORKER + "/death/notifications?older_than=604800", { method: "DELETE", credentials: "include" });
-    const data = await res.json();
-    alert(`Deleted ${data.deleted} old notifications.`);
-    await refreshDeathData();
-  } catch (e) {
-    alert("Delete failed: " + e.message);
+function renderDeathFeed(items) {
+  const container = document.getElementById("death-feed");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const filtered = deathFilter
+    ? items.filter((item) => item.workflow && item.workflow.toLowerCase().includes(deathFilter.toLowerCase()))
+    : items;
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="death-empty">No log events match current filter.</div>';
+    return;
   }
+
+  filtered.forEach((item) => {
+    const entry = document.createElement("div");
+    const isFinding = item.type === "finding";
+    const isError = item.type === "error";
+    entry.className = `death-entry ${isFinding ? "finding" : isError ? "error" : ""}`;
+
+    const tagClass = item.workflow?.includes("bbp") ? "bbp" : item.workflow?.includes("sub") ? "subrecon" : "general";
+    const timeStr = item.timestamp ? new Date(item.timestamp).toLocaleTimeString() : "";
+
+    entry.innerHTML = `
+      <div class="death-entry-top">
+        <span class="death-tag-pill ${tagClass}">${item.workflow ?? "system"}</span>
+        ${item.type ? `<span class="death-entry-type-badge ${item.type}">${item.type}</span>` : ""}
+        <span class="death-entry-time">${timeStr}</span>
+      </div>
+      <div class="death-entry-text">${item.message ?? ""}</div>
+    `;
+    container.appendChild(entry);
+  });
 }
 
-// ── Utilities ──
-function timeAgo(date) {
-  const sec = Math.floor((Date.now() - date) / 1000);
-  if (sec < 60)   return "just now";
-  if (sec < 3600) return Math.floor(sec / 60) + "m ago";
-  if (sec < 86400) return Math.floor(sec / 3600) + "h ago";
-  return Math.floor(sec / 86400) + "d ago";
-}
+function renderDeathSidebarFeed(items) {
+  const container = document.getElementById("sidebar-death-feed");
+  if (!container) return;
+  container.innerHTML = "";
 
-function escHtml(str) {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  const previewItems = items.slice(0, 5);
+  if (!previewItems.length) {
+    container.innerHTML = '<div class="death-empty" style="padding:10px">No recent logs.</div>';
+    return;
+  }
+
+  previewItems.forEach((item) => {
+    const div = document.createElement("div");
+    const isFinding = item.type === "finding";
+    const isError = item.type === "error";
+    div.className = `death-mini-entry ${isFinding ? "finding" : isError ? "error" : ""}`;
+    div.textContent = `[${item.workflow ?? "log"}] ${item.message ?? ""}`;
+    container.appendChild(div);
+  });
 }

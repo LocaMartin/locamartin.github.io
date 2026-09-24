@@ -1,0 +1,298 @@
+name: Wildcard Subfinder Incremental
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 21 * * *"
+
+env:
+  WORKER_URL: "https://locamartin-auth.locamartin.workers.dev/death/notify"
+  NOTIFY_SECRET: ${{ secrets.DEATH_NOTIFY_SECRET }}
+
+jobs:
+  recon:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Decrypt Existing State
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          mkdir -p out/state log
+          if [ -f data.tar.gz.gpg ]; then
+            gpg --decrypt --batch --yes --passphrase "$DATA_SECRET" data.tar.gz.gpg | tar -xzf -
+          fi
+          touch out/state/processed_roots.txt
+          touch out/subdomains.txt
+
+      - name: Notify — Workflow Started
+        if: always()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Workflow started at $(date +'%Y-%m-%d %H:%M UTC')\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Get cache month key
+        id: date
+        run: echo "month=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
+
+      - name: Cache tool binaries (monthly rotation)
+        id: cache-tools
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: subrecon-tools-${{ runner.os }}-${{ steps.date.outputs.month }}
+          restore-keys: |
+            subrecon-tools-${{ runner.os }}-
+
+      - name: Notify — Cache Status
+        run: |
+          if [ "${{ steps.cache-tools.outputs.cache-hit }}" = "true" ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Tools loaded from cache (month: ${{ steps.date.outputs.month }}) — skipping download\"}"
+          else
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Cache miss for month ${{ steps.date.outputs.month }} — downloading fresh binaries\"}"
+          fi
+
+      - name: Install Subfinder
+        if: steps.cache-tools.outputs.cache-hit != 'true'
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Installing subfinder...\"}"
+          go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
+
+      - name: Install Assetfinder
+        if: steps.cache-tools.outputs.cache-hit != 'true'
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Installing assetfinder...\"}"
+          go install github.com/tomnomnom/assetfinder@latest
+
+      - name: Add Go bin to PATH
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Notify — Tools Ready
+        run: |
+          subfinder_ver=$(subfinder -version 2>&1 | head -1 || echo "unknown")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Tools ready\nSubfinder: $subfinder_ver\nAssetfinder: $(assetfinder 2>&1 | head -1 || echo 'ready')\"}"
+
+      - name: Prepare Directories
+        run: |
+          mkdir -p out/state log
+          touch out/state/processed_roots.txt
+          touch out/subdomains.txt
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Directories prepared\"}"
+
+      - name: Notify — Checking Source Files
+        run: |
+          bbp_count=$(wc -l < out/bbp/domains.txt 2>/dev/null || echo "0")
+          processed_count=$(wc -l < out/state/processed_roots.txt 2>/dev/null || echo "0")
+          existing_subs=$(wc -l < out/subdomains.txt 2>/dev/null || echo "0")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Source check:\nBBP domains.txt: $bbp_count lines\nAlready processed: $processed_count domains\nExisting subdomains: $existing_subs\"}"
+
+      - name: Monthly Reset of Processed Roots
+        run: |
+          if [ "$(date +%d)" = "01" ]; then
+            > out/state/processed_roots.txt
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Monthly reset: processed_roots.txt cleared. Full re-scan starting.\"}"
+          else
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] No monthly reset today (runs on 1st). Continuing incremental scan.\"}"
+          fi
+
+      - name: Prepare Root Domains
+        run: |
+          if [ ! -f out/bbp/domains.txt ] || [ ! -s out/bbp/domains.txt ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"subrecon\", \"type\": \"error\", \"text\": \"[subrecon] ERROR: out/bbp/domains.txt is missing or empty. Did bbscope.yml run yet?\"}"
+            exit 1
+          fi
+          cat out/bbp/domains.txt | sort -u > out/state/current_roots.txt
+          root_count=$(wc -l < out/state/current_roots.txt)
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Root domains prepared: $root_count unique domains\"}"
+
+      - name: Find New Roots
+        run: |
+          comm -23 out/state/current_roots.txt out/state/processed_roots.txt > out/state/new_roots.txt
+          new_count=$(wc -l < out/state/new_roots.txt)
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] New unprocessed roots found: $new_count\"}"
+
+      - name: Select Batch (10 Domains)
+        run: |
+          head -n 10 out/state/new_roots.txt > out/state/batch.txt
+          batch_count=$(wc -l < out/state/batch.txt)
+          batch_contents=$(cat out/state/batch.txt 2>/dev/null || echo "(empty)")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Batch selected: $batch_count domains\n$batch_contents\"}"
+
+      - name: Run Subfinder on Batch
+        run: |
+          if [ ! -s out/state/batch.txt ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] No new domains in batch. All roots already processed. Next reset on the 1st.\"}"
+            exit 0
+          fi
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Running subfinder on batch...\"}"
+
+          subfinder -dL out/state/batch.txt -all -recursive -silent \
+            -o /tmp/subfinder_out.txt 2>/tmp/subfinder_err.txt || true
+
+          subfinder_count=$(wc -l < /tmp/subfinder_out.txt 2>/dev/null || echo "0")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Subfinder done: $subfinder_count subdomains found\"}"
+
+      - name: Run Assetfinder on Batch
+        run: |
+          if [ ! -s out/state/batch.txt ]; then
+            exit 0
+          fi
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Running assetfinder on batch...\"}"
+
+          > /tmp/assetfinder_out.txt
+          while read -r domain; do
+            assetfinder --subs-only "$domain" >> /tmp/assetfinder_out.txt 2>/dev/null || true
+          done < out/state/batch.txt
+
+          assetfinder_count=$(wc -l < /tmp/assetfinder_out.txt 2>/dev/null || echo "0")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Assetfinder done: $assetfinder_count subdomains found\"}"
+
+      - name: Merge Results
+        run: |
+          if [ ! -s out/state/batch.txt ]; then
+            exit 0
+          fi
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Merging subfinder + assetfinder results...\"}"
+
+          cat /tmp/subfinder_out.txt /tmp/assetfinder_out.txt >> out/subdomains.txt
+          sort -u out/subdomains.txt -o out/subdomains.txt
+
+          total=$(wc -l < out/subdomains.txt)
+          subfinder_count=$(wc -l < /tmp/subfinder_out.txt 2>/dev/null || echo "0")
+          assetfinder_count=$(wc -l < /tmp/assetfinder_out.txt 2>/dev/null || echo "0")
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"success\", \"text\": \"[subrecon] Merge complete\nSubfinder found: $subfinder_count\nAssetfinder found: $assetfinder_count\nTotal unique subdomains: $total\"}"
+
+          cat out/state/batch.txt >> out/state/processed_roots.txt
+          sort -u out/state/processed_roots.txt -o out/state/processed_roots.txt
+
+          processed_total=$(wc -l < out/state/processed_roots.txt)
+          root_total=$(wc -l < out/state/current_roots.txt)
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Progress: $processed_total / $root_total root domains processed\"}"
+
+      - name: Commit Results
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"info\", \"text\": \"[subrecon] Committing results to repo...\"}"
+
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git add out/subdomains.txt out/state/processed_roots.txt
+          git commit -m "Incremental update: $(date +'%Y-%m-%d')" || echo "No changes"
+          git pull --rebase origin main
+          git push
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"success\", \"text\": \"[subrecon] Workflow completed successfully at $(date +'%Y-%m-%d %H:%M UTC')\"}"
+
+      - name: Encrypt and Commit Results
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          tar -czf - out/ | gpg --symmetric --cipher-algo AES256 --batch --yes --passphrase "$DATA_SECRET" -o data.tar.gz.gpg
+
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git add data.tar.gz.gpg
+          git rm -rf --cached out/ || true
+          git commit -m "Incremental update (encrypted): $(date +'%Y-%m-%d')" || echo "No changes"
+          git pull --rebase origin main
+          git push
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"error\", \"text\": \"[subrecon] FAILED\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Notify on Cancellation
+        if: cancelled()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"subrecon\", \"type\": \"error\", \"text\": \"[subrecon] CANCELLED (timeout or manual stop)\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"

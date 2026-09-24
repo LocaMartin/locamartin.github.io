@@ -1,0 +1,351 @@
+name: Nuclei Header Sub
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 22 * * *"
+
+env:
+  WORKER_URL: "https://locamartin-auth.locamartin.workers.dev/death/notify"
+  NOTIFY_SECRET: ${{ secrets.DEATH_NOTIFY_SECRET }}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      chunks: ${{ steps.split.outputs.chunks }}
+      batch_size: ${{ steps.split.outputs.batch_size }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Notify — Prepare Job Started
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Prepare job started at $(date +'%Y-%m-%d %H:%M UTC')\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Monthly Reset
+        run: |
+          mkdir -p out/state
+          touch out/state/nuclei_sub_processed.txt
+          if [ "$(date +%d)" = "01" ]; then
+            > out/state/nuclei_sub_processed.txt
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Monthly reset: nuclei_sub_processed.txt cleared. Full re-scan starting.\"}"
+          else
+            processed=$(wc -l < out/state/nuclei_sub_processed.txt)
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] No monthly reset today. Already processed: $processed subdomains\"}"
+          fi
+
+      - name: Check subdomains file
+        run: |
+          if [ ! -f out/subdomains.txt ] || [ ! -s out/subdomains.txt ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] ERROR: out/subdomains.txt is missing or empty. Did subrecon.yml run yet?\"}"
+            exit 1
+          fi
+          total=$(wc -l < out/subdomains.txt)
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Total subdomains available: $total\"}"
+
+      - name: Select incremental batch
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Selecting batch of up to 500 unprocessed subdomains...\"}"
+
+          comm -23 <(sort out/subdomains.txt) \
+                   <(sort out/state/nuclei_sub_processed.txt) \
+          | head -n 500 > out/state/nuclei_sub_batch.txt
+
+          batch_size=$(wc -l < out/state/nuclei_sub_batch.txt)
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Batch selected: $batch_size subdomains\"}"
+
+      - name: Notify batch status
+        run: |
+          batch_size=$(wc -l < out/state/nuclei_sub_batch.txt)
+          if [ "$batch_size" -eq 0 ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] No new subdomains to scan. All processed. Next reset on the 1st.\"}"
+          else
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Splitting $batch_size subdomains across 4 parallel runners...\"}"
+          fi
+
+      - name: Split batch into 4 chunks
+        id: split
+        run: |
+          batch_size=$(wc -l < out/state/nuclei_sub_batch.txt)
+          echo "batch_size=$batch_size" >> $GITHUB_OUTPUT
+
+          if [ "$batch_size" -eq 0 ]; then
+            echo "chunks=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          mkdir -p out/state/chunks
+          chunk_size=$(( (batch_size + 3) / 4 ))
+          split -l "$chunk_size" out/state/nuclei_sub_batch.txt out/state/chunks/sub_chunk_
+
+          chunks=$(ls out/state/chunks/sub_chunk_* | xargs -I{} basename {} | jq -R . | jq -sc .)
+          echo "chunks=$chunks" >> $GITHUB_OUTPUT
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Chunks created: $(ls out/state/chunks/sub_chunk_* | wc -l) chunks of ~$chunk_size subdomains each\"}"
+
+      - name: Commit state
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Committing batch state to repo...\"}"
+
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git add out/state/
+          git commit -m "Sub: prepare incremental batch $(date +'%Y-%m-%d')" || echo "No changes"
+
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && break
+            echo "Push attempt $i failed, retrying in ${i}s..."
+            sleep $i
+          done
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Prepare job complete. Launching scan runners...\"}"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] PREPARE JOB FAILED\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Notify on Cancellation
+        if: cancelled()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] PREPARE JOB CANCELLED\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+  scan:
+    needs: prepare
+    if: needs.prepare.outputs.batch_size != '0'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        chunk: ${{ fromJson(needs.prepare.outputs.chunks) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull latest state (ensure chunks exist)
+        run: |
+          git pull origin main
+          if [ ! -f "out/state/chunks/${{ matrix.chunk }}" ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] ERROR: chunk file out/state/chunks/${{ matrix.chunk }} not found after pull. Prepare job may have failed to push.\"}"
+            exit 1
+          fi
+
+      - name: Notify — Scan Runner Started
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Runner started for chunk: ${{ matrix.chunk }}\nSubdomains in chunk: $(wc -l < out/state/chunks/${{ matrix.chunk }})\"}"
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Get cache month key
+        id: date
+        run: echo "month=$(date +'%Y-%m')" >> $GITHUB_OUTPUT
+
+      - name: Cache Nuclei binary (monthly rotation)
+        id: cache-nuclei
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin/nuclei
+          key: nuclei-${{ runner.os }}-${{ steps.date.outputs.month }}
+          restore-keys: |
+            nuclei-${{ runner.os }}-
+
+      - name: Notify — Nuclei Cache Status
+        run: |
+          if [ "${{ steps.cache-nuclei.outputs.cache-hit }}" = "true" ]; then
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Nuclei loaded from cache (month: ${{ steps.date.outputs.month }}) for chunk ${{ matrix.chunk }}\"}"
+          else
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Cache miss — downloading nuclei for chunk ${{ matrix.chunk }}\"}"
+          fi
+
+      - name: Install Nuclei
+        if: steps.cache-nuclei.outputs.cache-hit != 'true'
+        run: |
+          go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+
+      - name: Add Go bin to PATH
+        run: echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Update Nuclei Templates
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Updating nuclei templates for chunk ${{ matrix.chunk }}...\"}"
+          nuclei -update-templates -silent
+
+      - name: Run Nuclei on chunk
+        run: |
+          domain_count=$(wc -l < out/state/chunks/${{ matrix.chunk }})
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Scanning chunk ${{ matrix.chunk }} ($domain_count subdomains)...\"}"
+
+          nuclei -nc \
+            -l out/state/chunks/${{ matrix.chunk }} \
+            -t http/vulnerabilities/generic/oob-header-based-interaction.yaml,http/vulnerabilities/generic/host-header-injection.yaml \
+            -nh -silent | tee log/sub_${{ matrix.chunk }}.log | while read -r line; do
+              curl -s -X POST "$WORKER_URL" \
+                -H "Authorization: Bearer $NOTIFY_SECRET" \
+                -H "Content-Type: application/json" \
+                -d "{\"tag\": \"sub\", \"type\": \"finding\", \"text\": \"[sub] FINDING: $line\"}" -o /dev/null
+          done
+
+          finding_count=$(wc -l < log/sub_${{ matrix.chunk }}.log 2>/dev/null || echo "0")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"success\", \"text\": \"[sub] Chunk ${{ matrix.chunk }} scan done. Findings: $finding_count\"}"
+
+      - name: Commit chunk log
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] Committing log for chunk ${{ matrix.chunk }}...\"}"
+
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git add log/sub_${{ matrix.chunk }}.log
+          git commit -m "Sub scan: ${{ matrix.chunk }} $(date +'%Y-%m-%d')" || echo "No changes"
+          git pull --rebase origin main
+          git push
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] SCAN FAILED for chunk ${{ matrix.chunk }}\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Notify on Cancellation
+        if: cancelled()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] SCAN CANCELLED for chunk ${{ matrix.chunk }} (timeout or manual stop)\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+  mark-processed:
+    needs: scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Notify — Mark Processed Started
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"info\", \"text\": \"[sub] All scan runners finished. Marking batch as processed...\"}"
+
+      - name: Mark batch as processed
+        run: |
+          cat out/state/nuclei_sub_batch.txt >> out/state/nuclei_sub_processed.txt
+          sort -u out/state/nuclei_sub_processed.txt -o out/state/nuclei_sub_processed.txt
+
+      - name: Send completion notification
+        run: |
+          total_processed=$(wc -l < out/state/nuclei_sub_processed.txt)
+          total_domains=$(wc -l < out/subdomains.txt)
+          remaining=$(( total_domains - total_processed ))
+          total_findings=$(cat log/sub_chunk_*.log 2>/dev/null | wc -l || echo "0")
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"success\", \"text\": \"[sub] Scan complete\nProcessed today's batch\nTotal processed: $total_processed / $total_domains\nRemaining: $remaining\nTotal findings this run: $total_findings\"}"
+
+      - name: Commit processed state
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git add out/state/nuclei_sub_processed.txt
+          git commit -m "Sub: mark batch processed $(date +'%Y-%m-%d')" || echo "No changes"
+          git pull --rebase origin main
+          git push
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"success\", \"text\": \"[sub] Workflow fully complete at $(date +'%Y-%m-%d %H:%M UTC')\"}"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] MARK-PROCESSED JOB FAILED\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Notify on Cancellation
+        if: cancelled()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] MARK-PROCESSED JOB CANCELLED\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"

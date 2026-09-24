@@ -1,0 +1,161 @@
+name: Scope Fetcher and Notifier
+
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+
+env:
+  WORKER_URL: "https://locamartin-auth.locamartin.workers.dev/death/notify"
+  NOTIFY_SECRET: ${{ secrets.DEATH_NOTIFY_SECRET }}
+
+jobs:
+  fetch-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Notify — Workflow Started
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"info\", \"text\": \"[bbscope] Scope fetch started at $(date +'%Y-%m-%d %H:%M UTC')\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Create output directories
+        run: |
+          mkdir -p out/bbp
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"info\", \"text\": \"[bbscope] Output directories ready\"}"
+
+      - name: Fetch BBP scope data
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"info\", \"text\": \"[bbscope] Fetching BBP scope from bbscope API...\"}"
+
+          curl -sf "https://bbscope.com/api/v1/targets/wildcards?scope=in&type=bbp" -o out/bbp/wildcards.txt || { \
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] ERROR: Failed to fetch BBP wildcards\"}"; exit 1; }
+
+          curl -sf "https://bbscope.com/api/v1/targets/domains?scope=in&type=bbp" -o out/bbp/domains.txt || { \
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] ERROR: Failed to fetch BBP domains\"}"; exit 1; }
+
+          curl -sf "https://bbscope.com/api/v1/targets/ips?scope=in&type=bbp" -o out/bbp/ips.txt || { \
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] ERROR: Failed to fetch BBP IPs\"}"; exit 1; }
+
+          curl -sf "https://bbscope.com/api/v1/targets/cidrs?scope=in&type=bbp" -o out/bbp/cidrs.txt || { \
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] ERROR: Failed to fetch BBP CIDRs\"}"; exit 1; }
+
+          curl -sf "https://bbscope.com/api/v1/targets/urls?scope=in&type=bbp" \
+            | grep -Evi 'google|apple' > out/bbp/urls.txt || { \
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] ERROR: Failed to fetch BBP URLs\"}"; exit 1; }
+
+      - name: Strip IPs/CIDRs leaking into domains and wildcards
+        run: |
+          ip_cidr_regex='^([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]{1,2})?$'
+
+          for f in out/bbp/domains.txt out/bbp/wildcards.txt; do
+            before=$(wc -l < "$f")
+            grep -vE "$ip_cidr_regex" "$f" > "${f}.clean" && mv "${f}.clean" "$f"
+            after=$(wc -l < "$f")
+            removed=$(( before - after ))
+            if [ "$removed" -gt 0 ]; then
+              curl -s -X POST "$WORKER_URL" \
+                -H "Authorization: Bearer $NOTIFY_SECRET" \
+                -H "Content-Type: application/json" \
+                -d "{\"tag\": \"bbp\", \"type\": \"info\", \"text\": \"[bbscope] Filtered $removed IP/CIDR entries out of $(basename $f)\"}"
+            fi
+          done
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"success\", \"text\": \"[bbscope] BBP fetch complete\nWildcards: $(wc -l < out/bbp/wildcards.txt)\nDomains: $(wc -l < out/bbp/domains.txt)\nIPs: $(wc -l < out/bbp/ips.txt)\nCIDRs: $(wc -l < out/bbp/cidrs.txt)\nURLs: $(wc -l < out/bbp/urls.txt)\"}"
+
+      - name: Commit and Push changes
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"info\", \"text\": \"[bbscope] Committing scope files to repo...\"}"
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add out/
+          git diff --quiet && git diff --staged --quiet || \
+            (git commit -m "Automated update: scope data $(date +'%Y-%m-%d')" && \
+             git pull --rebase origin main && \
+             git push)
+
+      - name: Compress, Encrypt, and Commit Data
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          tar -czf - out/ | gpg --symmetric --cipher-algo AES256 --batch --yes --passphrase "$DATA_SECRET" -o data.tar.gz.gpg
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.tar.gz.gpg
+          git rm -rf --cached out/ || true
+          git diff --quiet && git diff --staged --quiet || \
+            (git commit -m "Automated update: encrypted scope data $(date +'%Y-%m-%d')" && \
+            git pull --rebase origin main && \
+            git push)
+
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"success\", \"text\": \"[bbscope] Scope files committed and pushed successfully\"}"
+
+      - name: Notify — Workflow Complete
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"success\", \"text\": \"[bbscope] All done at $(date +'%Y-%m-%d %H:%M UTC')\"}"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] FAILED\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Notify on Cancellation
+        if: cancelled()
+        run: |
+          curl -s -X POST "$WORKER_URL" \
+            -H "Authorization: Bearer $NOTIFY_SECRET" \
+            -H "Content-Type: application/json" \
+            -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbscope] CANCELLED (timeout or manual stop)\nRun URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
+      - name: Decrypt Existing Data (if present)
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          if [ -f data.tar.gz.gpg ]; then
+            gpg --decrypt --batch --yes --passphrase "$DATA_SECRET" data.tar.gz.gpg | tar -xzf -
+          fi

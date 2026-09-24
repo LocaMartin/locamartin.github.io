@@ -4,20 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Death Dashboard</title>
-  <link rel="icon" href="data:image/svg+xml,<svg viewBox='0 0 237.933 237.933' fill='%23a78bfa' xmlns='http://www.w3.org/2000/svg'><path d='M233.158,23.945c-0.144-0.248-3.922-7.695-24.301-15.826C195.925,2.959,181.005,0,167.922,0c-13.595,0-24.628,3.053-32.796,9.072c-1.143,0.844-1.623,1.859-1.315,2.789c0.477,1.449,2.319,1.449,2.926,1.449c0.118,0,0.245-0.002,0.378-0.006c1.11-0.037,2.239-0.057,3.348-0.055c31.895,0.039,49.403,5.83,66.054,25.463l-39.881,68.203c-16.648-29.959-51.969-17.672-38.25-65.771c2.269-7.957,1.705-28.121-16.678-32.4c-0.096-0.027-1.904-0.365-2.004-0.373C91.617,4.998,83.844,25.133,82.545,33.303c-7.699,48.462-41.898,18.091-70.254,56.155c-28.354,38.065,27.8,26.836,32.494,79.108c2.029,34.263-6.596,37.842-10.865,54.029c-8.533,32.357,51.989,11.143,78.871-41.395c6.959-14.154,16.193-21.283,25.363-25.576l-27.277,46.648c-0.18,0.229-0.287,0.518-0.287,0.829c0,0.744,0.604,1.349,1.348,1.349h13.355c0.447,0,0.865-0.224,1.116-0.594c2.558-3.787,16.147-28.49,30.687-54.695c11.988-3.633,19.837-7.73,15.177-27.225c9.928-17.687,18.552-32.698,22.246-38.06c7.65-11.102,14.258-20.689,16.608-24.162c6.844-10.105,22.119-33.791,22.271-34.029C233.767,25.128,233.594,24.704,233.158,23.945z'/></svg>">
 
-  <!-- Styles -->
+  <!-- Asset Path Alignment -->
   <link rel="stylesheet" href="../res/css/death.css">
   <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
 
-  <!-- Cloudflare Analytics -->
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token": "8251a6bb19dc4a7d9891e58e5948697e"}'></script>
-
-  <!-- Dependencies — defer keeps document order -->
   <script src="https://cdn.quilljs.com/1.3.7/quill.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" defer></script>
-
   <script src="../res/js/death.js" defer></script>
 </head>
 <body>
@@ -26,7 +19,7 @@
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
-<!-- ── Login ── -->
+<!-- Login -->
 <div id="login-screen">
   <div class="login-card">
     <div class="lock">
@@ -34,7 +27,7 @@
         <path d="M233.158,23.945c-0.144-0.248-3.922-7.695-24.301-15.826C195.925,2.959,181.005,0,167.922,0c-13.595,0-24.628,3.053-32.796,9.072c-1.143,0.844-1.623,1.859-1.315,2.789c0.477,1.449,2.319,1.449,2.926,1.449c0.118,0,0.245-0.002,0.378-0.006c1.11-0.037,2.239-0.057,3.348-0.055c31.895,0.039,49.403,5.83,66.054,25.463l-39.881,68.203c-16.648-29.959-51.969-17.672-38.25-65.771c2.269-7.957,1.705-28.121-16.678-32.4c-0.096-0.027-1.904-0.365-2.004-0.373C91.617,4.998,83.844,25.133,82.545,33.303c-7.699,48.462-41.898,18.091-70.254,56.155c-28.354,38.065,27.8,26.836,32.494,79.108c2.029,34.263-6.596,37.842-10.865,54.029c-8.533,32.357,51.989,11.143,78.871-41.395c6.959-14.154,16.193-21.283,25.363-25.576l-27.277,46.648c-0.18,0.229-0.287,0.518-0.287,0.829c0,0.744,0.604,1.349,1.348,1.349h13.355c0.447,0,0.865-0.224,1.116-0.594c2.558-3.787,16.147-28.49,30.687-54.695c11.988-3.633,19.837-7.73,15.177-27.225c9.928-17.687,18.552-32.698,22.246-38.06c7.65-11.102,14.258-20.689,16.608-24.162c6.844-10.105,22.119-33.791,22.271-34.029C233.767,25.128,233.594,24.704,233.158,23.945z"/>
       </svg>
     </div>
-    <h1>Death Dashboard</h1>
+    <h1>Death</h1>
     <p>Enter your username and password to continue</p>
     <form id="login-form" autocomplete="on">
       <label class="auth-label" for="username">Username</label>
@@ -58,539 +51,257 @@
   </div>
 </div>
 
-<!-- ── App ── -->
+<!-- App -->
 <div id="app">
   <nav>
     <span class="logo"><a href="/">LOCAMARTIN</a></span>
 
-    <!-- Nav pills -->
     <div class="nav-center">
       <a href="/" class="nav-pill">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Home
       </a>
+      <button class="nav-pill" onclick="openFull('death-pipeline')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Death Recon
+      </button>      
       <button class="nav-pill" onclick="openFull('analytics')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         Analytics
       </button>
       <button class="nav-pill" onclick="openFull('notes')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Notes
       </button>
       <button class="nav-pill" onclick="openFull('portfolio')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Portfolio
       </button>
-      <span class="nav-pill soon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Scan Results
-        <span class="badge-soon">Soon</span>
-      </span>
-      <span class="nav-pill soon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-        Database
-        <span class="badge-soon">Soon</span>
-      </span>
     </div>
 
-    <button class="menu-btn" onclick="toggleSidebar()">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6H20"/><path d="M4 12H20"/><path d="M4 18H20"/></svg>
-    </button>
+    <div class="nav-right">
+      <button class="icon-btn" onclick="toggleSidebar()" title="Toggle Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="icon-btn" onclick="logout()" title="Logout">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
   </nav>
 
   <div class="main-content">
-    <div class="welcome-card">
-      <h2>Welcome back 👋</h2>
-      <p>Use the nav bar above or the menu to access Analytics, Notes, Portfolio editor and more.</p>
+    <div class="welcome-banner">
+      <div class="welcome-badge">SYSTEM SECURE</div>
+      <h2>Internal Operations Control</h2>
+      <p>Select a module from the top bar to inspect metrics, check live reconnaissance logs, or access your quick workspace scratchpad.</p>
     </div>
   </div>
 </div>
 
-<!-- ── Sidebar overlay ── -->
-<div id="overlay" onclick="closeSidebar()"></div>
+<!-- Overlay & Sidebar -->
+<div id="overlay" class="overlay" onclick="closeSidebar()"></div>
 
-<!-- ── Sidebar ── -->
-<div id="sidebar">
+<div id="sidebar" class="sidebar">
   <div class="sidebar-header">
-    <h2>Menu</h2>
-    <button class="close-btn" onclick="closeSidebar()">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6L18 18"/><path d="M18 6L6 18"/></svg>
-    </button>
+    <div class="title">Menu</div>
+    <button class="close-btn" onclick="closeSidebar()">✕</button>
   </div>
 
   <div class="sidebar-nav">
-
-    <button class="nav-item active" onclick="showPanel('analytics', event)">
-      <div class="nav-item-left">
-        <span class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        </span>
-        Analytics
-      </div>
-      <svg class="open-full" onclick="openFull('analytics'); event.stopPropagation();" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    <button class="nav-item active" onclick="showPanel('death-pipeline', event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Death Recon
     </button>
-
-    <button class="nav-item" onclick="showPanel('death', event)">
-      <div class="nav-item-left">
-        <span class="icon">
-          <svg viewBox="0 0 237.933 237.933" fill="currentColor" width="18" height="18"><path d="M233.158,23.945c-0.144-0.248-3.922-7.695-24.301-15.826C195.925,2.959,181.005,0,167.922,0c-13.595,0-24.628,3.053-32.796,9.072c-1.143,0.844-1.623,1.859-1.315,2.789c0.477,1.449,2.319,1.449,2.926,1.449c0.118,0,0.245-0.002,0.378-0.006c1.11-0.037,2.239-0.057,3.348-0.055c31.895,0.039,49.403,5.83,66.054,25.463l-39.881,68.203c-16.648-29.959-51.969-17.672-38.25-65.771c2.269-7.957,1.705-28.121-16.678-32.4c-0.096-0.027-1.904-0.365-2.004-0.373C91.617,4.998,83.844,25.133,82.545,33.303c-7.699,48.462-41.898,18.091-70.254,56.155c-28.354,38.065,27.8,26.836,32.494,79.108c2.029,34.263-6.596,37.842-10.865,54.029c-8.533,32.357,51.989,11.143,78.871-41.395c6.959-14.154,16.193-21.283,25.363-25.576l-27.277,46.648c-0.18,0.229-0.287,0.518-0.287,0.829c0,0.744,0.604,1.349,1.348,1.349h13.355c0.447,0,0.865-0.224,1.116-0.594c2.558-3.787,16.147-28.49,30.687-54.695c11.988-3.633,19.837-7.73,15.177-27.225c9.928-17.687,18.552-32.698,22.246-38.06c7.65-11.102,14.258-20.689,16.608-24.162c6.844-10.105,22.119-33.791,22.271-34.029C233.767,25.128,233.594,24.704,233.158,23.945z"/></svg>
-        </span>
-        Death Clock
-      </div>
-      <svg class="open-full" onclick="openFull('death'); event.stopPropagation();" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-    </button>
-
-    <button class="nav-item" onclick="showPanel('death-pipeline', event)">
-  <div class="nav-item-left">
-    <span class="icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-    </span>
-    Death Pipeline
-  </div>
-  <svg class="open-full" onclick="openFull('death-pipeline'); event.stopPropagation();"
-       viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-    <polyline points="15 3 21 3 21 9"/>
-    <line x1="10" y1="14" x2="21" y2="3"/>
-   </svg>
-   </button>
-
-    <button class="nav-item" onclick="showPanel('notes', event)">
-      <div class="nav-item-left">
-        <span class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        </span>
-        Notes
-      </div>
-      <svg class="open-full" onclick="openFull('notes'); event.stopPropagation();" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-    </button>
-
-    <button class="nav-item" onclick="openFull('portfolio'); closeSidebar();">
-      <div class="nav-item-left">
-        <span class="icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-        </span>
-        Edit Portfolio
-      </div>
-      <svg class="open-full" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-    </button>
-
-  </div>
-
-  <!-- Sidebar body (compact previews) -->
-  <div class="sidebar-body" style="flex:1; overflow-y:auto; padding:14px 12px;">
-
-    <!-- Analytics preview -->
-    <div class="panel active" id="panel-analytics">
-      <div class="loading-msg" id="loading-msg">Loading…</div>
-      <div class="error-msg" id="error-msg">Failed to load.</div>
-      <div id="analytics-content" style="display:none">
-        <div class="stat-card" style="margin-bottom:12px">
-          <div class="num" id="total-views">0</div>
-          <div class="label">Total page views</div>
-        </div>
-        <div class="section-title">Last 7 days</div>
-        <div class="chart-wrap" id="chart"></div>
-        <div class="section-title">Top pages</div>
-        <div id="top-pages"></div>
-      </div>
-    </div>
-
-    <!-- Death preview -->
-    <div class="panel" id="panel-death" style="display:none">
-      <p class="death-intro">Estimate life expectancy with a live countdown.</p>
-      <div class="death-input-row"><label>Date of birth</label><input type="date" id="dob"></div>
-      <div class="death-input-row">
-        <label>Sex</label>
-        <select id="sex"><option value="male">Male</option><option value="female">Female</option></select>
-      </div>
-      <div class="death-input-row">
-        <label>Lifestyle</label>
-        <select id="lifestyle">
-          <option value="healthy">Healthy</option>
-          <option value="average" selected>Average</option>
-          <option value="unhealthy">Unhealthy</option>
-        </select>
-      </div>
-      <button class="calc-btn" onclick="calcDeath()">Calculate</button>
-      <div class="death-result" id="death-result">
-        <div class="est-date" id="death-date"></div>
-        <div class="years-left" id="years-left"></div>
-        <div class="countdown" id="countdown"></div>
-        <div class="disclaimer">Statistical estimate only, not medical advice.</div>
-      </div>
-    </div>
-
-    <!-- Notes preview -->
-    <div class="panel" id="panel-notes" style="display:none">
-      <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Click the expand icon or the Notes button above for the full editor.</p>
-      <div class="notes-list" id="sidebar-notes-list"></div>
-    </div>
-<div class="panel" id="panel-death-pipeline" style="display:none">
-  <p style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">
-    Live pipeline — click expand for full view.
-  </p>
-
-  <!-- Mini stat grid -->
-  <div class="death-mini-stat-row">
-    <div class="death-mini-stat">
-      <div class="mn" id="sidebar-dstat-domains">—</div>
-      <div class="ml">BBP Domains</div>
-    </div>
-    <div class="death-mini-stat">
-      <div class="mn" id="sidebar-dstat-subs">—</div>
-      <div class="ml">Subdomains</div>
-    </div>
-    <div class="death-mini-stat">
-      <div class="mn" id="sidebar-dstat-findings" style="color:#34d399">—</div>
-      <div class="ml">Findings</div>
-    </div>
-    <div class="death-mini-stat">
-      <div class="mn" id="sidebar-dstat-processed">—</div>
-      <div class="ml">Processed</div>
-    </div>
-  </div>
-
-  <!-- Mini notification feed -->
-  <div class="section-title">Recent</div>
-  <div class="death-mini-feed" id="sidebar-death-feed">
-    <div style="font-size:0.75rem;color:var(--muted)">Loading…</div>
-  </div>
-</div>
-
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- ── Full-page: Analytics ── -->
-<!-- ═══════════════════════════════════════════════ -->
-<div class="fullpage-panel" id="fp-analytics">
-  <div class="fp-header">
-    <div class="fp-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <button class="nav-item" onclick="showPanel('analytics', event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Analytics
-    </div>
-    <button class="fp-close" onclick="closeFull('analytics')">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6L18 18"/><path d="M18 6L6 18"/></svg>
     </button>
-  </div>
-  <div class="fp-body">
-    <div class="analytics-grid" id="fp-stat-cards">
-      <div class="stat-card"><div class="num" id="fp-total">0</div><div class="label">Total Views</div></div>
-      <div class="stat-card"><div class="num" id="fp-today">0</div><div class="label">Today</div></div>
-      <div class="stat-card"><div class="num" id="fp-week">0</div><div class="label">This Week</div></div>
-      <div class="stat-card"><div class="num" id="fp-pages">0</div><div class="label">Unique Pages</div></div>
-    </div>
-    <div class="section-title">Last 7 days</div>
-    <div class="chart-wrap" id="fp-chart" style="height:120px;margin-bottom:28px"></div>
-    <div class="section-title">Top pages</div>
-    <div id="fp-top-pages"></div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- ── Full-page: Death Clock ── -->
-<!-- ═══════════════════════════════════════════════ -->
-<div class="fullpage-panel" id="fp-death">
-  <div class="fp-header">
-    <div class="fp-title">
-      <svg viewBox="0 0 237.933 237.933" fill="currentColor" width="18" height="18"><path d="M233.158,23.945c-0.144-0.248-3.922-7.695-24.301-15.826C195.925,2.959,181.005,0,167.922,0c-13.595,0-24.628,3.053-32.796,9.072c-1.143,0.844-1.623,1.859-1.315,2.789c0.477,1.449,2.319,1.449,2.926,1.449c0.118,0,0.245-0.002,0.378-0.006c1.11-0.037,2.239-0.057,3.348-0.055c31.895,0.039,49.403,5.83,66.054,25.463l-39.881,68.203c-16.648-29.959-51.969-17.672-38.25-65.771c2.269-7.957,1.705-28.121-16.678-32.4c-0.096-0.027-1.904-0.365-2.004-0.373C91.617,4.998,83.844,25.133,82.545,33.303c-7.699,48.462-41.898,18.091-70.254,56.155c-28.354,38.065,27.8,26.836,32.494,79.108c2.029,34.263-6.596,37.842-10.865,54.029c-8.533,32.357,51.989,11.143,78.871-41.395c6.959-14.154,16.193-21.283,25.363-25.576l-27.277,46.648c-0.18,0.229-0.287,0.518-0.287,0.829c0,0.744,0.604,1.349,1.348,1.349h13.355c0.447,0,0.865-0.224,1.116-0.594c2.558-3.787,16.147-28.49,30.687-54.695c11.988-3.633,19.837-7.73,15.177-27.225c9.928-17.687,18.552-32.698,22.246-38.06c7.65-11.102,14.258-20.689,16.608-24.162c6.844-10.105,22.119-33.791,22.271-34.029C233.767,25.128,233.594,24.704,233.158,23.945z"/></svg>
-      Death Clock
-    </div>
-    <button class="fp-close" onclick="closeFull('death')">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6L18 18"/><path d="M18 6L6 18"/></svg>
-    </button>
-  </div>
-  <div class="fp-body">
-    <div class="death-layout">
-      <!-- Left: form -->
-      <div>
-        <p class="death-intro">Enter your details to estimate life expectancy and see a live countdown.</p>
-        <div class="death-input-row"><label>Date of birth</label><input type="date" id="fp-dob"></div>
-        <div class="death-input-row">
-          <label>Biological sex</label>
-          <select id="fp-sex"><option value="male">Male</option><option value="female">Female</option></select>
-        </div>
-        <div class="death-input-row">
-          <label>Lifestyle</label>
-          <select id="fp-lifestyle">
-            <option value="healthy">Healthy (exercise, no smoking)</option>
-            <option value="average" selected>Average</option>
-            <option value="unhealthy">Unhealthy (smoking, sedentary)</option>
-          </select>
-        </div>
-        <button class="calc-btn" onclick="calcDeathFull()">Calculate</button>
-        <div class="death-result" id="fp-death-result">
-          <div class="est-date" id="fp-death-date"></div>
-          <div class="years-left" id="fp-years-left"></div>
-          <div class="countdown" id="fp-countdown"></div>
-          <div class="disclaimer">⚠ Statistical estimate for fun only — not medical advice.</div>
-        </div>
-      </div>
-      <!-- Right: upcoming projects -->
-      <div>
-        <div class="upcoming-section">
-          <h3>Upcoming Projects</h3>
-          <div class="upcoming-grid">
-            <div class="upcoming-card">
-              <div class="uc-icon">🔍</div>
-              <div class="uc-name">Scan Results</div>
-              <div class="uc-desc">Store and browse vuln scan outputs from your tools.</div>
-              <span class="uc-badge">Coming Soon</span>
-            </div>
-            <div class="upcoming-card">
-              <div class="uc-icon">🗄️</div>
-              <div class="uc-name">Database</div>
-              <div class="uc-desc">D1-backed private data storage for personal records.</div>
-              <span class="uc-badge">Coming Soon</span>
-            </div>
-            <div class="upcoming-card">
-              <div class="uc-icon">🧠</div>
-              <div class="uc-name">AI Assistant</div>
-              <div class="uc-desc">Private AI chat connected to your own Cloudflare Worker.</div>
-              <span class="uc-badge">Coming Soon</span>
-            </div>
-            <div class="upcoming-card">
-              <div class="uc-icon">📡</div>
-              <div class="uc-name">Recon Dashboard</div>
-              <div class="uc-desc">Subdomain, DNS and asset tracking for bug bounty.</div>
-              <span class="uc-badge">Coming Soon</span>
-            </div>
-            <div class="upcoming-card">
-              <div class="uc-icon">🎯</div>
-              <div class="uc-name">Target Tracker</div>
-              <div class="uc-desc">Track bug bounty programs, scope and findings.</div>
-              <span class="uc-badge">Coming Soon</span>
-            </div>
-            <div class="upcoming-card">
-              <div class="uc-icon">📊</div>
-              <div class="uc-name">Report Generator</div>
-              <div class="uc-desc">Auto-generate vuln reports from structured data.</div>
-              <span class="uc-badge">Coming Soon</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════ -->
-<!-- ── Full-page: Notes ── -->
-<!-- ═══════════════════════════════════════════════ -->
-<div class="fullpage-panel" id="fp-notes">
-  <div class="fp-header">
-    <div class="fp-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <button class="nav-item" onclick="showPanel('notes', event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       Notes
-    </div>
-    <button class="fp-close" onclick="closeFull('notes')">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6L18 18"/><path d="M18 6L6 18"/></svg>
+    </button>
+    <button class="nav-item" onclick="showPanel('portfolio', event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Portfolio
     </button>
   </div>
-  <div class="fp-body">
-    <div class="notes-layout">
-      <!-- Left: list -->
+
+  <div class="sidebar-body">
+    <!-- Death Recon Panel -->
+    <div id="panel-death-pipeline" class="panel active">
+      <div class="death-mini-summary">
+        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-domains">0</span><span class="lbl">BBP Domains</span></div>
+        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-subs">0</span><span class="lbl">Subdomains</span></div>
+        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-findings">0</span><span class="lbl">Findings</span></div>
+        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-processed">0</span><span class="lbl">Processed</span></div>
+      </div>
+      <div id="sidebar-death-feed" class="death-mini-feed"></div>
+      <button class="expand-btn" onclick="openFull('death-pipeline')">Open Full Dashboard</button>
+    </div>
+
+    <!-- Analytics Panel -->
+    <div id="panel-analytics" class="panel">
+      <div id="loading-msg"><div class="spinner"></div>Loading...</div>
+      <div id="error-msg" style="display:none;color:#f87171;font-size:0.82rem">Failed to load analytics.</div>
+      <div id="analytics-content" style="display:none">
+        <div class="stat-card">
+          <div class="label">Total Views</div>
+          <div class="value" id="total-views">0</div>
+        </div>
+        <div class="chart-container"><div id="chart" class="chart"></div></div>
+        <div class="pages-list"><div class="section-title">Top Pages</div><div id="top-pages"></div></div>
+      </div>
+      <button class="expand-btn" onclick="openFull('analytics')">Open Full Analytics</button>
+    </div>
+
+    <!-- Notes Panel -->
+    <div id="panel-notes" class="panel">
+      <div id="sidebar-notes-list" class="notes-list-small"></div>
+      <button class="expand-btn" onclick="openFull('notes')">Open Notes Workspace</button>
+    </div>
+
+    <!-- Portfolio Panel -->
+    <div id="panel-portfolio" class="panel">
+      <p style="font-size:0.82rem;color:var(--muted)">Manage your portfolio details in full view mode.</p>
+      <button class="expand-btn" onclick="openFull('portfolio')">Open Portfolio Editor</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fullpage Overlays -->
+
+<!-- Fullpage Death Pipeline -->
+<div id="fp-death-pipeline" class="fullpage-panel">
+  <div class="fp-header">
+    <div class="fp-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      DEATH Recon Pipeline
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="death-last-updated" style="font-size:0.75rem;color:var(--muted)"></span>
+      <button class="icon-btn" onclick="refreshDeathData()" title="Refresh Data">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      </button>
+      <button class="fp-close" onclick="closeFull('death-pipeline')">✕</button>
+    </div>
+  </div>
+
+  <div class="fp-content">
+    <div class="death-stats-grid">
+      <div class="dstat-card"><div class="dstat-val" id="dstat-bbp-domains">0</div><div class="dstat-lbl">BBP Domains</div></div>
+      <div class="dstat-card"><div class="dstat-val" id="dstat-bbp-wildcards">0</div><div class="dstat-lbl">Wildcards</div></div>
+      <div class="dstat-card"><div class="dstat-val" id="dstat-bbp-ips">0</div><div class="dstat-lbl">BBP IPs</div></div>
+      <div class="dstat-card"><div class="dstat-val" id="dstat-subdomains">0</div><div class="dstat-lbl">Subdomains</div></div>
+      <div class="dstat-card finding"><div class="dstat-val" id="dstat-findings">0</div><div class="dstat-lbl">Total Findings</div></div>
+      <div class="dstat-card finding"><div class="dstat-val" id="dstat-findings-bbp">0</div><div class="dstat-lbl">BBP Findings</div></div>
+      <div class="dstat-card error"><div class="dstat-val" id="dstat-errors">0</div><div class="dstat-lbl">Errors</div></div>
+      <div class="dstat-card"><div class="dstat-val" id="dstat-notifs">0</div><div class="dstat-lbl">Total Logs</div></div>
+    </div>
+
+    <div class="death-progress-section">
+      <div class="death-progress-item">
+        <div class="dp-info"><span>BBP Domains Scan Progress</span><span id="dbar-bbp-count">0 / 0</span></div>
+        <div class="dp-bar"><div id="dbar-bbp-processed" class="dp-fill"></div></div>
+      </div>
+      <div class="death-progress-item">
+        <div class="dp-info"><span>Subdomains Scan Progress</span><span id="dbar-sub-count">0 / 0</span></div>
+        <div class="dp-bar"><div id="dbar-sub-processed" class="dp-fill"></div></div>
+      </div>
+    </div>
+
+    <div class="death-section-title">Workflow Status</div>
+    <div id="death-runs-grid" class="death-runs-grid"></div>
+
+    <div class="death-section-title" style="margin-top:24px">
+      <span>Live Pipeline Notifications</span>
+      <div class="death-feed-filters">
+        <button class="death-filter-btn active" onclick="setDeathFilter('', this)">All</button>
+        <button class="death-filter-btn" onclick="setDeathFilter('bbp', this)">BBP</button>
+        <button class="death-filter-btn" onclick="setDeathFilter('sub', this)">Subrecon</button>
+        <button class="death-filter-btn" onclick="setDeathFilter('cleanup', this)">Cleanup</button>
+      </div>
+    </div>
+
+    <div id="death-feed-loading" class="death-loading" style="display:none"><div class="spinner"></div>Loading events...</div>
+    <div id="death-feed" class="death-feed"></div>
+  </div>
+</div>
+
+<!-- Fullpage Analytics -->
+<div id="fp-analytics" class="fullpage-panel">
+  <div class="fp-header">
+    <div class="fp-title">Analytics Overview</div>
+    <button class="fp-close" onclick="closeFull('analytics')">✕</button>
+  </div>
+  <div class="fp-content">
+    <div class="fp-stats">
+      <div class="fp-stat-card"><div class="val" id="fp-total">0</div><div class="lbl">Total Views</div></div>
+      <div class="fp-stat-card"><div class="val" id="fp-today">0</div><div class="lbl">Today</div></div>
+      <div class="fp-stat-card"><div class="val" id="fp-week">0</div><div class="lbl">This Week</div></div>
+      <div class="fp-stat-card"><div class="val" id="fp-pages">0</div><div class="lbl">Unique Pages</div></div>
+    </div>
+    <div class="chart-container" style="height:200px;margin:24px 0"><div id="fp-chart" class="chart"></div></div>
+    <div class="pages-list"><div class="section-title">All Tracked Pages</div><div id="fp-top-pages"></div></div>
+  </div>
+</div>
+
+<!-- Fullpage Notes -->
+<div id="fp-notes" class="fullpage-panel">
+  <div class="fp-header">
+    <div class="fp-title">Notes Scratchpad</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="note-saved" style="font-size:0.8rem;color:#34d399"></span>
+      <button class="btn-primary" onclick="newNote()">+ New Note</button>
+      <button class="btn-primary" onclick="saveCurrentNote()">Save</button>
+      <button class="fp-close" onclick="closeFull('notes')">✕</button>
+    </div>
+  </div>
+  <div class="fp-content" style="padding:0">
+    <div class="notes-workspace">
       <div class="notes-sidebar">
-        <div class="notes-sidebar-header">
-          <span>Notes</span>
-          <button class="new-note-btn" onclick="newNote()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            New
-          </button>
-        </div>
-        <div class="notes-list" id="fp-notes-list"></div>
+        <div class="notes-sidebar-header">Saved Notes</div>
+        <div id="fp-notes-list" class="notes-list"></div>
       </div>
-      <!-- Right: editor -->
-      <div class="note-editor-col">
-        <div class="note-editor-top">
-          <input class="note-title-input" id="note-title" placeholder="Note title…">
-          <button class="save-btn" onclick="saveCurrentNote()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Save
-          </button>
-          <span class="save-confirm" id="note-saved"></span>
-        </div>
-        <div id="quill-editor"></div>
+      <div class="notes-editor">
+        <input type="text" id="note-title" class="note-title-input" placeholder="Note Title...">
+        <div id="quill-editor" class="quill-container"></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════ -->
-<!-- ── Full-page: Portfolio Editor ── -->
-<!-- ═══════════════════════════════════════════════ -->
-<div class="fullpage-panel" id="fp-portfolio">
+<!-- Fullpage Portfolio -->
+<div id="fp-portfolio" class="fullpage-panel">
   <div class="fp-header">
-    <div class="fp-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      Edit Portfolio / Home Page
+    <div class="fp-title">Portfolio Editor</div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="pe-saved" style="font-size:0.8rem;color:#34d399"></span>
+      <button class="btn-primary" onclick="savePortfolio()">Save</button>
+      <button class="btn-primary" style="background:rgba(255,255,255,0.1)" onclick="exportPortfolio()">Copy JSON</button>
+      <button class="fp-close" onclick="closeFull('portfolio')">✕</button>
     </div>
-    <button class="fp-close" onclick="closeFull('portfolio')">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6L18 18"/><path d="M18 6L6 18"/></svg>
-    </button>
   </div>
-  <div class="fp-body">
-    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6">
-      Edit your portfolio fields below. Changes are saved to your browser (localStorage). 
-      When ready, copy the generated values into your <code style="color:var(--purple)">index.html</code> 
-      and push to GitHub.
-    </p>
-
-    <!-- Hero -->
-    <div class="pe-section">
-      <h3>Hero / About</h3>
-      <div class="pe-grid">
-        <div class="pe-field"><label>Full Name</label><input id="pe-name" placeholder="Lokanath Pradhan"></div>
-        <div class="pe-field"><label>Title / Role</label><input id="pe-title" placeholder="Cybersecurity Researcher · Bug Bounty Hunter"></div>
+  <div class="fp-content">
+    <div class="portfolio-form">
+      <div class="form-row">
+        <div class="form-group"><label for="pe-name">Full Name</label><input type="text" id="pe-name"></div>
+        <div class="form-group"><label for="pe-title">Title / Role</label><input type="text" id="pe-title"></div>
       </div>
-      <div class="pe-field"><label>Summary paragraph</label><textarea id="pe-summary" rows="4" placeholder="Short bio shown on homepage…"></textarea></div>
-    </div>
-
-    <!-- Links -->
-    <div class="pe-section">
-      <h3>Social Links</h3>
-      <div class="pe-grid">
-        <div class="pe-field"><label>GitHub URL</label><input id="pe-github" placeholder="https://github.com/locamartin"></div>
-        <div class="pe-field"><label>LinkedIn URL</label><input id="pe-linkedin" placeholder="https://linkedin.com/in/…"></div>
-        <div class="pe-field"><label>Medium URL</label><input id="pe-medium" placeholder="https://medium.com/@…"></div>
-        <div class="pe-field"><label>Proof of Findings URL</label><input id="pe-proof" placeholder="https://gist.github.com/…"></div>
+      <div class="form-group"><label for="pe-summary">Summary</label><textarea id="pe-summary" rows="3"></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label for="pe-github">GitHub URL</label><input type="text" id="pe-github"></div>
+        <div class="form-group"><label for="pe-linkedin">LinkedIn URL</label><input type="text" id="pe-linkedin"></div>
+        <div class="form-group"><label for="pe-medium">Medium / Blog</label><input type="text" id="pe-medium"></div>
       </div>
-    </div>
-
-    <!-- Skills -->
-    <div class="pe-section">
-      <h3>Skills (comma-separated per group)</h3>
-      <div class="pe-field"><label>Languages</label><input id="pe-sk-lang" placeholder="Python, JavaScript, Golang, Bash…"></div>
-      <div class="pe-field"><label>Security Tools</label><input id="pe-sk-tools" placeholder="Burp Suite, Nuclei, Nmap…"></div>
-      <div class="pe-field"><label>Vuln Classes</label><input id="pe-sk-vuln" placeholder="SSRF, XSS, CORS…"></div>
-    </div>
-
-    <!-- Export -->
-    <div class="pe-save-bar">
-      <span class="pe-save-confirm" id="pe-saved"></span>
-      <button class="pe-save-btn" onclick="savePortfolio()">Save to browser</button>
-      <button class="pe-save-btn" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.25);color:#93c5fd" onclick="exportPortfolio()">Copy as JSON</button>
+      <div class="form-group"><label for="pe-proof">Bug Bounty / Proof Link</label><input type="text" id="pe-proof"></div>
+      <div class="form-row">
+        <div class="form-group"><label for="pe-sk-lang">Languages (comma separated)</label><input type="text" id="pe-sk-lang"></div>
+        <div class="form-group"><label for="pe-sk-tools">Tools (comma separated)</label><input type="text" id="pe-sk-tools"></div>
+        <div class="form-group"><label for="pe-sk-vuln">Vulnerabilities (comma separated)</label><input type="text" id="pe-sk-vuln"></div>
+      </div>
     </div>
   </div>
 </div>
-
-<!-- ── Full-page: Death Pipeline ── -->
-<div class="fullpage-panel" id="fp-death-pipeline">
-  <div class="fp-header">
-    <div class="fp-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-      Death Pipeline
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <button class="death-action-btn" onclick="refreshDeathData()" title="Refresh">
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <polyline points="23 4 23 10 17 10"/>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-        </svg>
-        Refresh
-      </button>
-      <button class="fp-close" onclick="closeFull('death-pipeline')">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M6 6L18 18"/><path d="M18 6L6 18"/>
-        </svg>
-      </button>
-    </div>
-  </div>
-
-  <div class="fp-body">
-
-    <!-- Stat cards -->
-    <div class="section-title">Scope</div>
-    <div class="death-stats-row">
-      <div class="death-stat-card">
-        <div class="ds-num" id="dstat-bbp-domains">—</div>
-        <div class="ds-label">BBP Domains</div>
-      </div>
-      <div class="death-stat-card">
-        <div class="ds-num" id="dstat-bbp-wildcards">—</div>
-        <div class="ds-label">Wildcards</div>
-      </div>
-      <div class="death-stat-card">
-        <div class="ds-num" id="dstat-bbp-ips">—</div>
-        <div class="ds-label">IPs</div>
-      </div>
-      <div class="death-stat-card">
-        <div class="ds-num" id="dstat-subdomains">—</div>
-        <div class="ds-label">Subdomains</div>
-      </div>
-      <div class="death-stat-card finding">
-        <div class="ds-num" id="dstat-findings">—</div>
-        <div class="ds-label">Total Findings</div>
-      </div>
-      <div class="death-stat-card finding">
-        <div class="ds-num" id="dstat-findings-bbp">—</div>
-        <div class="ds-label">BBP Findings</div>
-      </div>
-      <div class="death-stat-card error">
-        <div class="ds-num" id="dstat-errors">—</div>
-        <div class="ds-label">Errors</div>
-      </div>
-      <div class="death-stat-card">
-        <div class="ds-num" id="dstat-notifs">—</div>
-        <div class="ds-label">Log Events</div>
-      </div>
-    </div>
-
-    <!-- Scan progress bars -->
-    <div class="section-title">Scan Progress</div>
-    <div class="death-scope-section">
-      <div class="death-scope-row">
-        <div class="death-scope-label">BBP Nuclei</div>
-        <div class="death-scope-bar-wrap">
-          <div class="death-scope-bar" id="dbar-bbp-processed" style="width:0%"></div>
-        </div>
-        <div class="death-scope-count" id="dbar-bbp-count">0 / 0</div>
-      </div>
-      <div class="death-scope-row">
-        <div class="death-scope-label">Sub Nuclei</div>
-        <div class="death-scope-bar-wrap">
-          <div class="death-scope-bar green" id="dbar-sub-processed" style="width:0%"></div>
-        </div>
-        <div class="death-scope-count" id="dbar-sub-count">0 / 0</div>
-      </div>
-    </div>
-
-    <!-- Workflow run cards -->
-    <div class="section-title">Latest Workflow Runs</div>
-    <div class="death-runs-grid" id="death-runs-grid">
-      <div class="death-loading">Loading GitHub runs…</div>
-    </div>
-
-    <!-- Notification feed -->
-    <div class="death-feed-header">
-      <div class="section-title" style="margin:0">Notification Log</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div class="death-feed-filters">
-          <button class="death-filter-btn active" onclick="setDeathFilter('', this)">All</button>
-          <button class="death-filter-btn" onclick="setDeathFilter('bbp', this)">BBP</button>
-          <button class="death-filter-btn" onclick="setDeathFilter('sub', this)">Sub</button>
-          <button class="death-filter-btn" onclick="setDeathFilter('subrecon', this)">Subrecon</button>
-          <button class="death-filter-btn" onclick="setDeathFilter('bbscope', this)">BBScope</button>
-          <button class="death-filter-btn" onclick="setDeathFilter('cleanup', this)">Cleanup</button>
-        </div>
-        <div class="death-feed-actions">
-          <button class="death-action-btn danger" onclick="deleteOldDeathNotifs()">Clear old</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="death-feed-loading" class="death-loading" style="display:none">Loading notifications…</div>
-    <div class="death-feed" id="death-feed">
-      <div class="death-empty">Loading…</div>
-    </div>
-    <div class="death-last-updated" id="death-last-updated"></div>
-
-  </div>
 </div>
 
 </body>
