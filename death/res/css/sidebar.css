@@ -1,116 +1,222 @@
+/* ── Overlay & Fullpage Panels ── */
 #overlay {
+  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
   z-index: 200;
 }
 
-#overlay.active {
-  opacity: 1;
-  pointer-events: auto;
+#overlay.open {
+  display: block;
 }
 
+.fullpage-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(10, 8, 30, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  overflow-y: auto;
+  flex-direction: column;
+}
+
+.fullpage-panel.open {
+  display: flex;
+}
+
+.fp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: 12px;
+}
+
+.fp-title {
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fp-title svg {
+  width: 18px;
+  height: 18px;
+  color: var(--purple);
+}
+
+.fp-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.fp-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text);
+}
+
+.fp-body {
+  flex: 1;
+  padding: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Sidebar Component ── */
 #sidebar {
   position: fixed;
   top: 0;
-  right: -420px;
-  width: 420px;
+  right: -320px;
+  width: 290px;
   height: 100vh;
-  background: var(--bg-card);
-  border-left: 1px solid var(--border-color);
-  z-index: 300;
-  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(15, 12, 41, 0.9);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+  z-index: 201;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
 
-#sidebar.active {
+#sidebar.open {
   right: 0;
 }
 
 .sidebar-header {
-  padding: 1.25rem;
-  border-bottom: 1px solid var(--border-color);
+  padding: 18px 14px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-header h2 {
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text);
 }
 
 .sidebar-nav {
+  padding: 10px 8px 6px;
   display: flex;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--bg-dark);
-  overflow-x: auto;
-}
-
-.sidebar-nav-item {
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-}
-
-.sidebar-nav-item.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-  background: var(--bg-panel);
-}
-
-.sidebar-panel-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1.25rem;
-}
-
-.sidebar-panel {
-  display: none;
-}
-
-.sidebar-panel.active {
-  display: block;
-}
-
-/* Fullpage Modal Overlay Engine */
-.fullpage-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-dark);
-  z-index: 500;
-  display: none;
   flex-direction: column;
-  overflow-y: auto;
+  gap: 3px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.fullpage-overlay.active {
+.nav-item {
   display: flex;
-}
-
-.fullpage-header {
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  background: var(--bg-card);
+  justify-content: space-between;
+  padding: 9px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.83rem;
+  color: var(--muted);
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  background: none;
+  width: 100%;
+  text-align: left;
 }
 
-.fullpage-body {
-  padding: 2rem;
-  max-width: 1400px;
-  width: 100%;
-  margin: 0 auto;
+.nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
+
+.nav-item .icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.nav-item.active {
+  background: var(--purple-dim);
+  color: var(--purple);
+  border-color: var(--purple-border);
+}
+
+.open-full {
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.nav-item:hover .open-full {
+  opacity: 0.6;
+}
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.28);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 14px 0 7px;
+}
+
+
+.sidebar-body { flex: 1; overflow-y: auto; padding: 12px 14px; }
+.sidebar-panel-content { display: none; }
+.expand-btn {
+  width: 100%; margin-top: 12px; padding: 9px; cursor: pointer; font-size: 0.8rem;
+  background: var(--purple-dim); border: 1px solid var(--purple-border);
+  color: var(--purple); border-radius: 10px; transition: all 0.2s;
+}
+.expand-btn:hover { background: rgba(167,139,250,0.28); }
+.badge-pill {
+  font-size: 0.6rem; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+  background: var(--purple-dim); color: var(--purple); letter-spacing: 0.5px;
+}
+.muted-note { font-size: 0.8rem; color: var(--muted); }

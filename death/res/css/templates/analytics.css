@@ -1,0 +1,98 @@
+/* ── Analytics Module Styles ── */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--purple-dim);
+  border: 1px solid var(--purple-border);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+}
+
+.stat-card .num {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--purple);
+}
+
+.stat-card .label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.page-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 7px;
+  margin-bottom: 5px;
+  font-size: 0.83rem;
+}
+
+.page-row .page-name {
+  color: var(--muted);
+  font-family: monospace;
+}
+
+.page-row .page-count {
+  background: var(--purple-dim);
+  color: #c4b5fd;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.chart-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 80px;
+  margin-top: 4px;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar {
+  width: 100%;
+  background: linear-gradient(180deg, var(--purple), #6d28d9);
+  border-radius: 3px 3px 0 0;
+  min-height: 2px;
+}
+
+.bar-label {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.loading-msg {
+  text-align: center;
+  color: var(--muted);
+  padding: 28px 0;
+  font-size: 0.88rem;
+}
+
+.error-msg {
+  text-align: center;
+  color: var(--red);
+  padding: 14px 0;
+  font-size: 0.83rem;
+  display: none;
+}

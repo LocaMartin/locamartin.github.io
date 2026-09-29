@@ -1,0 +1,246 @@
+/* ── Notes Scratchpad Module ── */
+.notes-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  height: calc(100vh - 120px);
+}
+
+@media (max-width: 700px) {
+  .notes-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.notes-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notes-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.notes-sidebar-header span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.new-note-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  background: var(--purple-dim);
+  border: 1px solid var(--purple-border);
+  border-radius: 8px;
+  color: #c4b5fd;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-note-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.new-note-btn:hover {
+  background: rgba(167, 139, 250, 0.28);
+}
+
+.notes-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  padding: 9px 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 9px;
+  cursor: pointer;
+  gap: 8px;
+  transition: border-color 0.2s;
+}
+
+.note-item.active {
+  border-color: var(--purple-border);
+  background: var(--purple-dim);
+}
+
+.note-item:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.note-item-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.note-item-title {
+  font-size: 0.83rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-item-date {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.note-item-del {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: none;
+  background: none;
+  color: rgba(251, 113, 133, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.note-item-del:hover {
+  color: var(--red);
+}
+
+.note-item-del svg {
+  width: 13px;
+  height: 13px;
+}
+
+.note-editor-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.note-editor-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.note-title-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  padding: 9px 14px;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+}
+
+.note-title-input:focus {
+  border-color: var(--purple-border);
+}
+
+.save-btn {
+  padding: 9px 18px;
+  background: var(--purple-dim);
+  border: 1px solid var(--purple-border);
+  border-radius: 9px;
+  color: #c4b5fd;
+  font-size: 0.83rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.save-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.save-btn:hover {
+  background: rgba(167, 139, 250, 0.3);
+}
+
+.save-confirm {
+  font-size: 0.75rem;
+  color: var(--green);
+  white-space: nowrap;
+}
+
+/* Quill Editor Custom Styling Overrides */
+#quill-editor {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0 0 12px 12px;
+  color: var(--text);
+  min-height: 420px;
+  font-size: 0.9rem;
+}
+
+.ql-toolbar {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: none !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.ql-toolbar .ql-stroke {
+  stroke: var(--muted) !important;
+}
+
+.ql-toolbar .ql-fill {
+  fill: var(--muted) !important;
+}
+
+.ql-toolbar button:hover .ql-stroke,
+.ql-toolbar .ql-active .ql-stroke {
+  stroke: var(--purple) !important;
+}
+
+.ql-toolbar button:hover .ql-fill,
+.ql-toolbar .ql-active .ql-fill {
+  fill: var(--purple) !important;
+}
+
+.ql-toolbar .ql-picker-label {
+  color: var(--muted) !important;
+}
+
+.ql-toolbar .ql-picker-options {
+  background: #1a1a2e !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ql-container {
+  border: none !important;
+}
+
+.ql-editor {
+  padding: 16px !important;
+  line-height: 1.7 !important;
+}
+
+.ql-editor.ql-blank::before {
+  color: var(--muted) !important;
+  font-style: normal !important;
+}

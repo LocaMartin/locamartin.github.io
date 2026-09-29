@@ -1,36 +1,96 @@
-window.AnalyticsTemplate = {
-  init: async function () {
-    const container = document.getElementById("panel-analytics");
-    if (!container) return;
+ModuleRegistry.register({
+  id: "analytics",
+  title: "Analytics",
+  icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  hasFullpage: true,
 
-    container.innerHTML = `
-      <div class="template-mini-panel">
-        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Traffic & Recon Metrics</p>
-        <div style="font-size: 1.5rem; font-weight: bold; color: var(--accent);">99.8% Success Rate</div>
-        <button class="expand-btn" style="margin-top: 1rem; width:100%; padding: 0.5rem; background: var(--bg-panel); border:1px solid var(--border-color); color:var(--text-main); border-radius:6px; cursor:pointer;" onclick="window.sidebarEngine?.openFullpage('analytics')">
-          View Detailed Analytics
-        </button>
-      </div>
-    `;
+  data: null,
+
+  async fetchStats(force = false) {
+    if (this.data && !force) return this.data;
+    const res = await Core.api("/stats");
+    if (!res.ok) throw new Error(`stats ${res.status}`);
+    return (this.data = await res.json());
   },
 
-  loadFull: async function () {
-    const body = document.getElementById("fp-body-analytics");
-    if (!body) return;
-
-    body.innerHTML = `
-      <h2>Telemetry & Request Analytics</h2>
-      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Historical request trends, scan rates, and latency breakdowns.</p>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px;">
-          <div style="color: var(--text-muted); font-size: 0.8rem;">TOTAL REQUESTS</div>
-          <div style="font-size: 1.8rem; font-weight: bold; margin-top: 0.5rem;">1,420,890</div>
-        </div>
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px;">
-          <div style="color: var(--text-muted); font-size: 0.8rem;">AVG RESPONSE TIME</div>
-          <div style="font-size: 1.8rem; font-weight: bold; margin-top: 0.5rem; color: var(--accent-green);">142 ms</div>
-        </div>
+  // ── sidebar mini panel ──
+  init(panel) {
+    panel.innerHTML = `
+      <div id="an-loading" class="loading-msg"><span class="spinner"></span>Loading...</div>
+      <div id="an-error" class="error-msg">Failed to load analytics.</div>
+      <div id="an-content" style="display:none">
+        <div class="stat-card"><div class="num" id="an-total">0</div><div class="label">Total Views</div></div>
+        <div class="chart-wrap" id="an-chart" style="margin-top:14px"></div>
+        <div class="section-title">Top Pages</div>
+        <div id="an-pages"></div>
       </div>
-    `;
-  }
-};
+      <button class="expand-btn" data-open>Open Full Analytics</button>`;
+    panel.querySelector("[data-open]").addEventListener("click", () => window.sidebarEngine.openFullpage("analytics"));
+    this.loadMini();
+  },
+
+  async loadMini() {
+    const $ = (id) => document.getElementById(id);
+    try {
+      const d = await this.fetchStats();
+      Core.setText("an-total", d.total || 0);
+      this.renderChart($("an-chart"), d, 80);
+      this.renderPages($("an-pages"), d);
+      $("an-loading").style.display = "none";
+      $("an-content").style.display = "block";
+    } catch {
+      $("an-loading").style.display = "none";
+      $("an-error").style.display = "block";
+    }
+  },
+
+  // ── fullscreen ──
+  loadFull(body) {
+    body.innerHTML = `
+      <div class="analytics-grid">
+        <div class="stat-card"><div class="num" id="an-fp-total">0</div><div class="label">Total Views</div></div>
+        <div class="stat-card"><div class="num" id="an-fp-today">0</div><div class="label">Today</div></div>
+        <div class="stat-card"><div class="num" id="an-fp-week">0</div><div class="label">This Week</div></div>
+        <div class="stat-card"><div class="num" id="an-fp-pages">0</div><div class="label">Unique Pages</div></div>
+      </div>
+      <div class="chart-wrap" id="an-fp-chart" style="height:200px;margin:24px 0"></div>
+      <div class="section-title">All Tracked Pages</div>
+      <div id="an-fp-list"></div>`;
+  },
+
+  async onOpen() {
+    try {
+      const d = await this.fetchStats(true);
+      const days = d.days || {};
+      const today = new Date().toISOString().slice(0, 10);
+      Core.setText("an-fp-total", d.total || 0);
+      Core.setText("an-fp-today", days[today] || 0);
+      Core.setText("an-fp-week", Object.values(days).reduce((a, b) => a + b, 0));
+      Core.setText("an-fp-pages", Object.keys(d.topPages || {}).length);
+      this.renderChart(document.getElementById("an-fp-chart"), d, 200);
+      this.renderPages(document.getElementById("an-fp-list"), d);
+    } catch (e) { console.error("[analytics]", e); }
+  },
+
+  renderChart(el, data, height) {
+    if (!el) return;
+    el.innerHTML = "";
+    const entries = Object.entries(data.days || {});
+    const max = Math.max(...entries.map(([, c]) => c), 1);
+    entries.forEach(([date, count]) => {
+      const h = Math.max(Math.round((count / max) * (height - 14)), count > 0 ? 4 : 2);
+      const col = document.createElement("div");
+      col.className = "bar-col";
+      col.innerHTML = `<div class="bar" style="height:${h}px" title="${count} views"></div><div class="bar-label">${Core.esc(date.slice(5))}</div>`;
+      el.appendChild(col);
+    });
+  },
+
+  renderPages(el, data) {
+    if (!el) return;
+    const sorted = Object.entries(data.topPages || {}).sort((a, b) => b[1] - a[1]);
+    el.innerHTML = sorted.length
+      ? sorted.map(([p, c]) => `<div class="page-row"><span class="page-name">${Core.esc(p)}</span><span class="page-count">${Core.esc(c)}</span></div>`).join("")
+      : `<p class="muted-note">No data yet.</p>`;
+  },
+});

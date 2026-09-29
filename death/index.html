@@ -5,17 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Death Dashboard</title>
 
-  <!-- Asset Path Alignment -->
-  <link rel="stylesheet" href="../res/css/death.css">
-  <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
+  <!-- Core styles -->
+  <link rel="stylesheet" href="res/css/index.css">
+  <link rel="stylesheet" href="res/css/sidebar.css">
 
+  <!-- Module styles (one per module: delete a line to detach) -->
+  <link rel="stylesheet" href="res/css/templates/home.css">
+  <link rel="stylesheet" href="res/css/templates/death.css">
+  <link rel="stylesheet" href="res/css/templates/recon.css">
+  <link rel="stylesheet" href="res/css/templates/analytics.css">
+  <link rel="stylesheet" href="res/css/templates/notes.css">
+  <link rel="stylesheet" href="res/css/templates/portfolio.css">
+
+  <!-- Vendor -->
+  <link rel="stylesheet" href="https://cdn.quilljs.com/1.3.7/quill.snow.css">
   <script src="https://cdn.quilljs.com/1.3.7/quill.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" defer></script>
-  <!-- Core Sidebar Scripts -->
-  <script src="res/js/sidebar-config.js" defer></script>
+
+  <!-- Core scripts (order matters) -->
+  <script src="res/js/core/core.js" defer></script>
   <script src="res/js/sidebar.js" defer></script>
 
-  <!-- Modular View Modules -->
+  <!-- Modules: each file registers itself with ModuleRegistry (delete a line to detach) -->
   <script src="res/js/templates/home.js" defer></script>
   <script src="res/js/templates/death.js" defer></script>
   <script src="res/js/templates/recon.js" defer></script>
@@ -23,6 +34,9 @@
   <script src="res/js/templates/notes.js" defer></script>
   <script src="res/js/templates/portfolio.js" defer></script>
 
+  <!-- Which modules are enabled + order, then auth (kicks everything off) -->
+  <script src="res/js/sidebar-config.js" defer></script>
+  <script src="res/js/core/auth.js" defer></script>
 </head>
 <body>
 
@@ -40,7 +54,7 @@
     </div>
     <h1>Death</h1>
     <p>Enter your username and password to continue</p>
-    <form id="login-form" autocomplete="on">
+    <form id="login-form" method="post" action="#" autocomplete="on">
       <label class="auth-label" for="username">Username</label>
       <input id="username" name="username" type="text" autocomplete="username" required>
       
@@ -67,267 +81,45 @@
   <nav>
     <span class="logo"><a href="/">LOCAMARTIN</a></span>
 
-    <div class="nav-center">
+    <div class="nav-center" id="nav-center">
       <a href="/" class="nav-pill">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Home
       </a>
-      <button class="nav-pill" onclick="openFull('death-pipeline')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Death Recon
-      </button>      
-      <button class="nav-pill" onclick="openFull('analytics')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Analytics
-      </button>
-      <button class="nav-pill" onclick="openFull('notes')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Notes
-      </button>
-      <button class="nav-pill" onclick="openFull('portfolio')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Portfolio
-      </button>
+      <!-- module pills are injected here by sidebar.js -->
     </div>
 
     <div class="nav-right">
-      <button class="icon-btn" onclick="toggleSidebar()" title="Toggle Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <button class="menu-btn" id="menu-toggle" title="Menu" aria-label="Menu">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <button class="icon-btn" onclick="logout()" title="Logout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <button class="menu-btn" id="logout-btn" title="Logout" aria-label="Logout">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
   </nav>
 
   <div class="main-content">
-    <div class="welcome-banner">
-      <div class="welcome-badge">SYSTEM SECURE</div>
+    <div class="welcome-card">
       <h2>Internal Operations Control</h2>
-      <p>Select a module from the sidebar to inspect metrics, check live reconnaissance logs, or access your quick workspace scratchpad.</p>
+      <p>Open the menu to inspect metrics, check live recon logs, or use your scratchpad.</p>
     </div>
   </div>
 </div>
 
-<!-- Dynamic Sidebar Drawer -->
-  <div id="overlay"></div>
-  <aside id="sidebar">
-    <div class="sidebar-header">
-      <h2>Control Panel</h2>
-      <button id="sidebar-close" class="close-btn">&times;</button>
-    </div>
-    <div id="sidebar-nav-items" class="sidebar-nav"></div>
-    <div id="sidebar-panels" class="sidebar-panel-container"></div>
-  </aside>
-
-<!-- Overlay & Sidebar -->
-<div id="overlay" class="overlay" onclick="closeSidebar()"></div>
-
-<div id="sidebar" class="sidebar">
+<!-- Sidebar shell (contents are generated from the enabled modules) -->
+<div id="overlay"></div>
+<aside id="sidebar">
   <div class="sidebar-header">
-    <div class="title">Menu</div>
-    <button class="close-btn" onclick="closeSidebar()">✕</button>
+    <h2>Control Panel</h2>
+    <button class="close-btn" id="sidebar-close" aria-label="Close menu">✕</button>
   </div>
+  <div class="sidebar-nav" id="sidebar-nav-items"></div>
+  <div class="sidebar-body" id="sidebar-panels"></div>
+</aside>
 
-  <div class="sidebar-nav">
-    <button class="nav-item active" onclick="showPanel('death-pipeline', event)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      Death Recon
-    </button>
-    <button class="nav-item" onclick="showPanel('analytics', event)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Analytics
-    </button>
-    <button class="nav-item" onclick="showPanel('notes', event)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      Notes
-    </button>
-    <button class="nav-item" onclick="showPanel('portfolio', event)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Portfolio
-    </button>
-  </div>
-
-  <!-- Dynamic Fullpage Containers -->
-  <div id="fullpage-containers"></div>
-
-  <div class="sidebar-body">
-    <!-- Death Recon Panel -->
-    <div id="panel-death-pipeline" class="panel active">
-      <div class="death-mini-summary">
-        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-domains">0</span><span class="lbl">BBP Domains</span></div>
-        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-subs">0</span><span class="lbl">Subdomains</span></div>
-        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-findings">0</span><span class="lbl">Findings</span></div>
-        <div class="death-mini-stat"><span class="val" id="sidebar-dstat-processed">0</span><span class="lbl">Processed</span></div>
-      </div>
-      <div id="sidebar-death-feed" class="death-mini-feed"></div>
-      <button class="expand-btn" onclick="openFull('death-pipeline')">Open Full Dashboard</button>
-    </div>
-
-    <!-- Analytics Panel -->
-    <div id="panel-analytics" class="panel">
-      <div id="loading-msg"><div class="spinner"></div>Loading...</div>
-      <div id="error-msg" style="display:none;color:#f87171;font-size:0.82rem">Failed to load analytics.</div>
-      <div id="analytics-content" style="display:none">
-        <div class="stat-card">
-          <div class="label">Total Views</div>
-          <div class="value" id="total-views">0</div>
-        </div>
-        <div class="chart-container"><div id="chart" class="chart"></div></div>
-        <div class="pages-list"><div class="section-title">Top Pages</div><div id="top-pages"></div></div>
-      </div>
-      <button class="expand-btn" onclick="openFull('analytics')">Open Full Analytics</button>
-    </div>
-
-    <!-- Notes Panel -->
-    <div id="panel-notes" class="panel">
-      <div id="sidebar-notes-list" class="notes-list-small"></div>
-      <button class="expand-btn" onclick="openFull('notes')">Open Notes Workspace</button>
-    </div>
-
-    <!-- Portfolio Panel -->
-    <div id="panel-portfolio" class="panel">
-      <p style="font-size:0.82rem;color:var(--muted)">Manage your portfolio details in full view mode.</p>
-      <button class="expand-btn" onclick="openFull('portfolio')">Open Portfolio Editor</button>
-    </div>
-  </div>
-</div>
-
-<!-- Fullpage Overlays -->
-
-<!-- Fullpage Death Pipeline -->
-<div id="fp-death-pipeline" class="fullpage-panel">
-  <div class="fp-header">
-    <div class="fp-title">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      DEATH Recon Pipeline
-    </div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span id="death-last-updated" style="font-size:0.75rem;color:var(--muted)"></span>
-      <button class="icon-btn" onclick="refreshDeathData()" title="Refresh Data">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </button>
-      <button class="fp-close" onclick="closeFull('death-pipeline')">✕</button>
-    </div>
-  </div>
-
-  <div class="fp-content">
-    <div class="death-stats-grid">
-      <div class="dstat-card"><div class="dstat-val" id="dstat-bbp-domains">0</div><div class="dstat-lbl">BBP Domains</div></div>
-      <div class="dstat-card"><div class="dstat-val" id="dstat-bbp-wildcards">0</div><div class="dstat-lbl">Wildcards</div></div>
-      <div class="dstat-card"><div class="dstat-val" id="dstat-bbp-ips">0</div><div class="dstat-lbl">BBP IPs</div></div>
-      <div class="dstat-card"><div class="dstat-val" id="dstat-subdomains">0</div><div class="dstat-lbl">Subdomains</div></div>
-      <div class="dstat-card finding"><div class="dstat-val" id="dstat-findings">0</div><div class="dstat-lbl">Total Findings</div></div>
-      <div class="dstat-card finding"><div class="dstat-val" id="dstat-findings-bbp">0</div><div class="dstat-lbl">BBP Findings</div></div>
-      <div class="dstat-card error"><div class="dstat-val" id="dstat-errors">0</div><div class="dstat-lbl">Errors</div></div>
-      <div class="dstat-card"><div class="dstat-val" id="dstat-notifs">0</div><div class="dstat-lbl">Total Logs</div></div>
-    </div>
-
-    <div class="death-progress-section">
-      <div class="death-progress-item">
-        <div class="dp-info"><span>BBP Domains Scan Progress</span><span id="dbar-bbp-count">0 / 0</span></div>
-        <div class="dp-bar"><div id="dbar-bbp-processed" class="dp-fill"></div></div>
-      </div>
-      <div class="death-progress-item">
-        <div class="dp-info"><span>Subdomains Scan Progress</span><span id="dbar-sub-count">0 / 0</span></div>
-        <div class="dp-bar"><div id="dbar-sub-processed" class="dp-fill"></div></div>
-      </div>
-    </div>
-
-    <div class="death-section-title">Workflow Status</div>
-    <div id="death-runs-grid" class="death-runs-grid"></div>
-
-    <div class="death-section-title" style="margin-top:24px">
-      <span>Live Pipeline Notifications</span>
-      <div class="death-feed-filters">
-        <button class="death-filter-btn active" onclick="setDeathFilter('', this)">All</button>
-        <button class="death-filter-btn" onclick="setDeathFilter('bbp', this)">BBP</button>
-        <button class="death-filter-btn" onclick="setDeathFilter('sub', this)">Subrecon</button>
-        <button class="death-filter-btn" onclick="setDeathFilter('cleanup', this)">Cleanup</button>
-      </div>
-    </div>
-
-    <div id="death-feed-loading" class="death-loading" style="display:none"><div class="spinner"></div>Loading events...</div>
-    <div id="death-feed" class="death-feed"></div>
-  </div>
-</div>
-
-<!-- Fullpage Analytics -->
-<div id="fp-analytics" class="fullpage-panel">
-  <div class="fp-header">
-    <div class="fp-title">Analytics Overview</div>
-    <button class="fp-close" onclick="closeFull('analytics')">✕</button>
-  </div>
-  <div class="fp-content">
-    <div class="fp-stats">
-      <div class="fp-stat-card"><div class="val" id="fp-total">0</div><div class="lbl">Total Views</div></div>
-      <div class="fp-stat-card"><div class="val" id="fp-today">0</div><div class="lbl">Today</div></div>
-      <div class="fp-stat-card"><div class="val" id="fp-week">0</div><div class="lbl">This Week</div></div>
-      <div class="fp-stat-card"><div class="val" id="fp-pages">0</div><div class="lbl">Unique Pages</div></div>
-    </div>
-    <div class="chart-container" style="height:200px;margin:24px 0"><div id="fp-chart" class="chart"></div></div>
-    <div class="pages-list"><div class="section-title">All Tracked Pages</div><div id="fp-top-pages"></div></div>
-  </div>
-</div>
-
-<!-- Fullpage Notes -->
-<div id="fp-notes" class="fullpage-panel">
-  <div class="fp-header">
-    <div class="fp-title">Notes Scratchpad</div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span id="note-saved" style="font-size:0.8rem;color:#34d399"></span>
-      <button class="btn-primary" onclick="newNote()">+ New Note</button>
-      <button class="btn-primary" onclick="saveCurrentNote()">Save</button>
-      <button class="fp-close" onclick="closeFull('notes')">✕</button>
-    </div>
-  </div>
-  <div class="fp-content" style="padding:0">
-    <div class="notes-workspace">
-      <div class="notes-sidebar">
-        <div class="notes-sidebar-header">Saved Notes</div>
-        <div id="fp-notes-list" class="notes-list"></div>
-      </div>
-      <div class="notes-editor">
-        <input type="text" id="note-title" class="note-title-input" placeholder="Note Title...">
-        <div id="quill-editor" class="quill-container"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Fullpage Portfolio -->
-<div id="fp-portfolio" class="fullpage-panel">
-  <div class="fp-header">
-    <div class="fp-title">Portfolio Editor</div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <span id="pe-saved" style="font-size:0.8rem;color:#34d399"></span>
-      <button class="btn-primary" onclick="savePortfolio()">Save</button>
-      <button class="btn-primary" style="background:rgba(255,255,255,0.1)" onclick="exportPortfolio()">Copy JSON</button>
-      <button class="fp-close" onclick="closeFull('portfolio')">✕</button>
-    </div>
-  </div>
-  <div class="fp-content">
-    <div class="portfolio-form">
-      <div class="form-row">
-        <div class="form-group"><label for="pe-name">Full Name</label><input type="text" id="pe-name"></div>
-        <div class="form-group"><label for="pe-title">Title / Role</label><input type="text" id="pe-title"></div>
-      </div>
-      <div class="form-group"><label for="pe-summary">Summary</label><textarea id="pe-summary" rows="3"></textarea></div>
-      <div class="form-row">
-        <div class="form-group"><label for="pe-github">GitHub URL</label><input type="text" id="pe-github"></div>
-        <div class="form-group"><label for="pe-linkedin">LinkedIn URL</label><input type="text" id="pe-linkedin"></div>
-        <div class="form-group"><label for="pe-medium">Medium / Blog</label><input type="text" id="pe-medium"></div>
-      </div>
-      <div class="form-group"><label for="pe-proof">Bug Bounty / Proof Link</label><input type="text" id="pe-proof"></div>
-      <div class="form-row">
-        <div class="form-group"><label for="pe-sk-lang">Languages (comma separated)</label><input type="text" id="pe-sk-lang"></div>
-        <div class="form-group"><label for="pe-sk-tools">Tools (comma separated)</label><input type="text" id="pe-sk-tools"></div>
-        <div class="form-group"><label for="pe-sk-vuln">Vulnerabilities (comma separated)</label><input type="text" id="pe-sk-vuln"></div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
+<!-- Fullscreen panels (generated) -->
+<div id="fullpage-containers"></div>
 
 </body>
 </html>
