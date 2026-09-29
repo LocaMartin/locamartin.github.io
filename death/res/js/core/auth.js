@@ -1,7 +1,7 @@
 /* Login / session / logout.
    Knows nothing about modules: once logged in it calls sidebarEngine.appReady(). */
 (function () {
-  const { api } = window.Core;
+  const api = (...args) => window.Core.api(...args);
 
   const $ = (id) => document.getElementById(id);
   const setError = (msg) => { const e = $("login-error"); if (e) e.textContent = msg || ""; };
