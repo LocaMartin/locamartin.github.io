@@ -13,5 +13,4 @@ window.SIDEBAR_MODULES = [
   "recon",
   "analytics",
   "notes",
-  "portfolio",
 ];
