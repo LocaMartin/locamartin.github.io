@@ -2,4 +2,4 @@ worker.js
 worker.js.bak
 .env
 *.log
-.worker/*
+.worker
