@@ -1,9 +1,8 @@
 <div align="center">
-<img src="death/img/death.png"/>
-<img src="death.svg"/>
+<img src= "docs/img/death.png"/>
+<img src="docs/img/death.svg"/>
 <p>https://locamartin.github.io</p>
 </div>
-
 
 ```yml
 git pull --rebase origin main

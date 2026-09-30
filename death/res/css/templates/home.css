@@ -1,0 +1,74 @@
+/* ── Home module ── */
+.home-hero {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 30px 28px;
+  margin-bottom: 20px;
+}
+
+.home-hero h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.home-hero p {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.home-card:hover {
+  border-color: var(--purple-border);
+  background: var(--purple-dim);
+  transform: translateY(-2px);
+}
+
+.home-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--purple-dim);
+  color: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.home-card-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.home-card-desc {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}

@@ -264,67 +264,28 @@ nav {
   gap: 12px;
 }
 
-.logo a {
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 2px;
-  background: linear-gradient(90deg, var(--purple), var(--blue));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-decoration: none;
-}
-
-.nav-center {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.nav-pill {
+.logo {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--muted);
-  transition: all 0.2s;
-  white-space: nowrap;
-  text-decoration: none;
-}
-
-.nav-pill svg {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-}
-
-.nav-pill:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.nav-pill.soon {
-  opacity: 0.45;
-  cursor: default;
-  pointer-events: none;
-}
-
-.badge-soon {
-  font-size: 0.6rem;
-  padding: 1px 5px;
-  border-radius: 10px;
-  background: var(--purple-dim);
   color: var(--purple);
-  border: 1px solid var(--purple-border);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.logo svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.logo:hover {
+  color: #c4b5fd;
+  transform: scale(1.06);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .menu-btn {
@@ -386,10 +347,56 @@ nav {
   border-radius: 2px;
 }
 
-/* ── Responsive Adaptations ── */
+/* ── Shared UI bits ── */
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.28);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 14px 0 7px;
+}
+
+.muted-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  vertical-align: middle;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-primary {
+  background: var(--purple-dim);
+  border: 1px solid var(--purple-border);
+  color: var(--purple);
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: rgba(167, 139, 250, 0.28);
+}
+
+/* ── Responsive ── */
 @media (max-width: 600px) {
-  .nav-center {
-    display: none;
+  nav {
+    padding: 0 12px;
   }
   .main-content {
     padding: 28px 14px;
@@ -397,19 +404,4 @@ nav {
   .fp-body {
     padding: 14px;
   }
-
-/* ── Shared UI bits (were used by the old HTML but never defined) ── */
-.nav-right { display: flex; align-items: center; gap: 8px; }
-.spinner {
-  width: 16px; height: 16px; display: inline-block; vertical-align: middle;
-  border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--purple);
-  border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-.btn-primary {
-  background: var(--purple-dim); border: 1px solid var(--purple-border); color: var(--purple);
-  padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s;
-}
-.btn-primary:hover { background: rgba(167,139,250,0.28); }
-.fp-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-.fp-flash { font-size: 0.78rem; color: var(--green); }

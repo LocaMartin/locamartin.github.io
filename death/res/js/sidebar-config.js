@@ -1,16 +1,13 @@
 /* ────────────────────────────────────────────────────────────
-   Which modules are ATTACHED, and in what order.
+   Which modules are ATTACHED, and in what order (= sidebar order).
 
-   To attach a module : add its <script> (+ optional CSS) to index.html
-                        and add its id here.
-   To detach a module : remove its id from this list (and, if you want,
-                        its <script>/<link> from index.html).
-   Nothing else in the codebase references a module by name.
+   Attach : add its <script> (+ CSS <link>) to index.html and its id here.
+   Detach : remove its id from this list (optionally its <script>/<link> too).
    ──────────────────────────────────────────────────────────── */
 window.SIDEBAR_MODULES = [
   "home",
   "death",
-  "recon",
+  "logs",
   "analytics",
   "notes",
 ];

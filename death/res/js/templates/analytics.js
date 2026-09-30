@@ -2,7 +2,7 @@ ModuleRegistry.register({
   id: "analytics",
   title: "Analytics",
   icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
-  hasFullpage: true,
+  description: "Page views and traffic",
 
   data: null,
 
@@ -11,37 +11,6 @@ ModuleRegistry.register({
     const res = await Core.api("/stats");
     if (!res.ok) throw new Error(`stats ${res.status}`);
     return (this.data = await res.json());
-  },
-
-  // ── sidebar mini panel ──
-  init(panel) {
-    panel.innerHTML = `
-      <div id="an-loading" class="loading-msg"><span class="spinner"></span>Loading...</div>
-      <div id="an-error" class="error-msg">Failed to load analytics.</div>
-      <div id="an-content" style="display:none">
-        <div class="stat-card"><div class="num" id="an-total">0</div><div class="label">Total Views</div></div>
-        <div class="chart-wrap" id="an-chart" style="margin-top:14px"></div>
-        <div class="section-title">Top Pages</div>
-        <div id="an-pages"></div>
-      </div>
-      <button class="expand-btn" data-open>Open Full Analytics</button>`;
-    panel.querySelector("[data-open]").addEventListener("click", () => window.sidebarEngine.openFullpage("analytics"));
-    this.loadMini();
-  },
-
-  async loadMini() {
-    const $ = (id) => document.getElementById(id);
-    try {
-      const d = await this.fetchStats();
-      Core.setText("an-total", d.total || 0);
-      this.renderChart($("an-chart"), d, 80);
-      this.renderPages($("an-pages"), d);
-      $("an-loading").style.display = "none";
-      $("an-content").style.display = "block";
-    } catch {
-      $("an-loading").style.display = "none";
-      $("an-error").style.display = "block";
-    }
   },
 
   // ── fullscreen ──

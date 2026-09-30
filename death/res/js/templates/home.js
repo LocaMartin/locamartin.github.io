@@ -1,22 +1,34 @@
 ModuleRegistry.register({
   id: "home",
   title: "Home",
+  description: "Overview and quick launcher",
   icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
-  hasFullpage: false,
 
-  init(panel) {
-    panel.innerHTML = `
-      <p class="muted-note">Pick a module above, or jump straight to one:</p>
-      <div id="home-quick-links"></div>`;
-    const box = panel.querySelector("#home-quick-links");
+  loadFull(body) {
+    body.innerHTML = `
+      <div class="home-hero">
+        <h2>Internal Operations Control</h2>
+        <p>Pick a module to open it fullscreen. Use the ☰ button any time to switch.</p>
+      </div>
+      <div class="home-grid" id="home-grid"></div>`;
+  },
+
+  // built on open so modules attached later still show up
+  onOpen() {
+    const grid = document.getElementById("home-grid");
+    if (!grid) return;
+    grid.innerHTML = "";
     window.sidebarEngine.mods
-      .filter((m) => m.hasFullpage)
+      .filter((m) => m.id !== this.id)
       .forEach((m) => {
-        const b = document.createElement("button");
-        b.className = "expand-btn";
-        b.textContent = `Open ${m.title}`;
-        b.addEventListener("click", () => window.sidebarEngine.openFullpage(m.id));
-        box.appendChild(b);
+        const card = document.createElement("button");
+        card.className = "home-card";
+        card.innerHTML = `
+          <span class="home-card-icon">${m.icon || ""}</span>
+          <span class="home-card-title">${Core.esc(m.title)}${m.badge ? ` <span class="badge-pill">${Core.esc(m.badge)}</span>` : ""}</span>
+          <span class="home-card-desc">${Core.esc(m.description || "")}</span>`;
+        card.addEventListener("click", () => window.sidebarEngine.openFullpage(m.id));
+        grid.appendChild(card);
       });
   },
 });
