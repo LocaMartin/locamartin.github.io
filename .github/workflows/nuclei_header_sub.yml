@@ -21,6 +21,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Decrypt Existing Data
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          # subrecon.yml commits results only as data.tar.gz.gpg (it removes out/
+          # from git tracking after encrypting). Without this step, out/subdomains.txt
+          # never exists here and every run fails at "Check subdomains file".
+          if [ -f data.tar.gz.gpg ]; then
+            gpg --decrypt --batch --yes --passphrase "$DATA_SECRET" data.tar.gz.gpg | tar -xzf -
+          else
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"sub\", \"type\": \"error\", \"text\": \"[sub] ERROR: data.tar.gz.gpg not found in repo. Has subrecon.yml run yet?\"}"
+          fi
+
       - name: Notify — Prepare Job Started
         run: |
           curl -s -X POST "$WORKER_URL" \
@@ -296,6 +312,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Decrypt Existing Data
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          # Needed again here (fresh checkout) because "Send completion notification"
+          # below reads out/subdomains.txt for the total-subdomain count.
+          if [ -f data.tar.gz.gpg ]; then
+            gpg --decrypt --batch --yes --passphrase "$DATA_SECRET" data.tar.gz.gpg | tar -xzf -
+          fi
 
       - name: Notify — Mark Processed Started
         run: |

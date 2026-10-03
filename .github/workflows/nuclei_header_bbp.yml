@@ -21,6 +21,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Decrypt Existing Data
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          # bbscope.yml commits scope data only as data.tar.gz.gpg (it removes out/
+          # from git tracking after encrypting). Without this step, out/bbp/domains.txt
+          # never exists here and every run fails at "Select incremental batch".
+          if [ -f data.tar.gz.gpg ]; then
+            gpg --decrypt --batch --yes --passphrase "$DATA_SECRET" data.tar.gz.gpg | tar -xzf -
+          else
+            curl -s -X POST "$WORKER_URL" \
+              -H "Authorization: Bearer $NOTIFY_SECRET" \
+              -H "Content-Type: application/json" \
+              -d "{\"tag\": \"bbp\", \"type\": \"error\", \"text\": \"[bbp] ERROR: data.tar.gz.gpg not found in repo. Has bbscope.yml run yet?\"}"
+          fi
+
       - name: Notify — Prepare Job Started
         run: |
           curl -s -X POST "$WORKER_URL" \
@@ -282,6 +298,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Decrypt Existing Data
+        env:
+          DATA_SECRET: ${{ secrets.DEATH_DATA_SECRET }}
+        run: |
+          # Needed again here (fresh checkout) because "Send completion notification"
+          # below reads out/bbp/domains.txt for the total-domain count.
+          if [ -f data.tar.gz.gpg ]; then
+            gpg --decrypt --batch --yes --passphrase "$DATA_SECRET" data.tar.gz.gpg | tar -xzf -
+          fi
 
       - name: Notify — Mark Processed Started
         run: |
