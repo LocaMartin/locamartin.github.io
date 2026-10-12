@@ -1,5 +1,44 @@
-worker.js
-worker.js.bak
+# Dependencies & Package Managers
+node_modules/
+package-lock.json
+
+# Virtual Environments
+myenv/
+venv/
+.venv/
+env/
+
+# Unencrypted Local Databases & Cache
+temp_targets.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Credentials, Keys & Secrets
+pass.txt
 .env
+.env.*
+*.pem
+*.key
+
+# Temporary & Audit Output Files
 *.log
-.worker
+log.txt
+log2.txt
+out_of_scope.txt
+tbl.txt
+server.txt
+
+# Backup Files & Archives
+*.bak
+
+# OS & IDE Specific Files
+.DS_Store
+.vscode/
+.idea/
+
+# Database Worker Code
+dworker.js
+
+# Worker Code
+worker.js

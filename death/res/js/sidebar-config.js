@@ -10,4 +10,7 @@ window.SIDEBAR_MODULES = [
   "logs",
   "analytics",
   "notes",
+  "database",
+  "app",
+  "nuke",
 ];
