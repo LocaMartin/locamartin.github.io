@@ -7,9 +7,11 @@
 
 :root {
   --purple: #a78bfa;
+  --purple-2: #8b6be8;
   --purple-dim: rgba(167, 139, 250, 0.15);
   --purple-border: rgba(167, 139, 250, 0.25);
   --blue: #60a5fa;
+  --indigo: #818cf8;
   --glass: rgba(255, 255, 255, 0.07);
   --glass-border: rgba(255, 255, 255, 0.12);
   --text: rgba(255, 255, 255, 0.88);
@@ -17,6 +19,15 @@
   --green: #6ee7b7;
   --pink: #f9a8d4;
   --red: #fda4af;
+  --amber: #fbbf24;
+
+  /* New: theme-control writes to these at runtime (inline style on :root),
+     everything else should read them rather than hardcoding radii/glow. */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --glow: 0 0 28px rgba(167, 139, 250, 0.22);
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 html {
@@ -32,7 +43,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Background Orbs ── */
+/* ── Background Orbs ── (unchanged — login screen stays as-is) */
 .orb {
   position: fixed;
   border-radius: 50%;
@@ -41,29 +52,11 @@ body {
   pointer-events: none;
   z-index: 0;
 }
-.orb1 {
-  width: 500px;
-  height: 500px;
-  background: #6c63ff;
-  top: -100px;
-  left: -100px;
-}
-.orb2 {
-  width: 400px;
-  height: 400px;
-  background: #ff6584;
-  bottom: -80px;
-  right: -80px;
-}
-.orb3 {
-  width: 300px;
-  height: 300px;
-  background: #43e8d8;
-  top: 40%;
-  left: 40%;
-}
+.orb1 { width: 500px; height: 500px; background: #6c63ff; top: -100px; left: -100px; }
+.orb2 { width: 400px; height: 400px; background: #ff6584; bottom: -80px; right: -80px; }
+.orb3 { width: 300px; height: 300px; background: #43e8d8; top: 40%; left: 40%; }
 
-/* ── Login Screen ── */
+/* ── Login Screen ── (unchanged) */
 #login-screen {
   position: relative;
   z-index: 10;
@@ -117,7 +110,6 @@ body {
   margin: 12px 0 6px;
 }
 
-/* Form Controls & Inputs */
 .login-card input[type="text"] {
   width: 100%;
   background: rgba(0, 0, 0, 0.2);
@@ -180,15 +172,9 @@ body {
   color: var(--muted);
   transition: color 0.2s;
 }
+.toggle-password:hover { color: var(--text); }
 
-.toggle-password:hover {
-  color: var(--text);
-}
-
-.eye-icon {
-  width: 18px;
-  height: 18px;
-}
+.eye-icon { width: 18px; height: 18px; }
 
 .login-submit {
   width: 100%;
@@ -220,28 +206,12 @@ body {
   animation: btnSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.38s both;
 }
 
-/* Animations */
-@keyframes cardFadeIn {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+@keyframes cardFadeIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes lockPop { from { opacity: 0; transform: scale(0.4); } to { opacity: 1; transform: scale(1); } }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes btnSlideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes lockPop {
-  from { opacity: 0; transform: scale(0.4); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-@keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes btnSlideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── App Interface Layout ── */
+/* ── App Interface Layout ── (restyled: glass nav, module status readout, UTC clock) */
 #app {
   display: none;
   position: relative;
@@ -249,12 +219,12 @@ body {
 }
 
 nav {
-  background: rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0 20px;
-  height: 58px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -264,46 +234,85 @@ nav {
   gap: 12px;
 }
 
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
   color: var(--purple);
   transition: color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.logo svg { width: 28px; height: 28px; display: block; }
+.logo:hover { color: #c4b5fd; transform: scale(1.06); }
+
+.nav-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+.nav-brand-text b {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.nav-module-readout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.nav-module-readout .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(110, 231, 183, 0.7);
+  flex-shrink: 0;
 }
 
-.logo svg {
-  width: 30px;
-  height: 30px;
-  display: block;
+.nav-clock {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  display: none;
 }
-
-.logo:hover {
-  color: #c4b5fd;
-  transform: scale(1.06);
+@media (min-width: 640px) {
+  .nav-clock { display: inline-block; }
 }
 
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .menu-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #fff;
   padding: 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-
 .menu-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: var(--glow);
 }
 
 .main-content {
@@ -314,44 +323,62 @@ nav {
 
 .welcome-card {
   background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 36px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-card::after {
+  content: "";
+  position: absolute;
+  right: -60px;
+  bottom: -60px;
+  width: 220px;
+  height: 220px;
+  background: rgba(167, 139, 250, 0.12);
+  border-radius: 50%;
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.welcome-card .eyebrow {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
 }
 
 .welcome-card h2 {
   font-size: 1.6rem;
-  font-weight: 600;
-  margin-bottom: 8px;
+  font-weight: 700;
+  margin: 6px 0 8px;
+  letter-spacing: -0.2px;
 }
 
 .welcome-card p {
   color: var(--muted);
   font-size: 0.95rem;
+  max-width: 560px;
+  line-height: 1.6;
 }
-
 
 /* ── Custom Scrollbar ── */
-::-webkit-scrollbar {
-  width: 4px;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, 0.4); }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 2px;
-}
-
-/* ── Shared UI bits ── */
+/* ── Shared UI bits (used across every module) ── */
 .section-title {
-  font-size: 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.3);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   margin: 14px 0 7px;
@@ -360,6 +387,7 @@ nav {
 .muted-note {
   font-size: 0.8rem;
   color: var(--muted);
+  line-height: 1.6;
 }
 
 .spinner {
@@ -373,35 +401,55 @@ nav {
   animation: spin 0.8s linear infinite;
   margin-right: 8px;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .btn-primary {
   background: var(--purple-dim);
   border: 1px solid var(--purple-border);
   color: var(--purple);
   padding: 7px 14px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.8rem;
+  font-weight: 600;
   transition: all 0.2s;
 }
+.btn-primary:hover { background: rgba(167, 139, 250, 0.28); box-shadow: var(--glow); }
 
-.btn-primary:hover {
-  background: rgba(167, 139, 250, 0.28);
+/* Pill badge used by module status chips (LIVE, D1 Edge, SOON, etc.) — same
+   look as sidebar.css's .badge-pill, duplicated as a utility class for use
+   inside module bodies (stat cards, headers) without depending on sidebar.css. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.pill-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple-border); }
+.pill-green  { background: rgba(110, 231, 183, 0.12); color: var(--green); border: 1px solid rgba(110, 231, 183, 0.3); }
+.pill-red    { background: rgba(253, 164, 175, 0.12); color: var(--red); border: 1px solid rgba(253, 164, 175, 0.3); }
+.pill-amber  { background: rgba(251, 191, 36, 0.12); color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.3); }
+.pill-indigo { background: rgba(129, 140, 248, 0.12); color: var(--indigo); border: 1px solid rgba(129, 140, 248, 0.3); }
+
+/* Generic glass card, used directly by templates.css components */
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
-  nav {
-    padding: 0 12px;
-  }
-  .main-content {
-    padding: 28px 14px;
-  }
-  .fp-body {
-    padding: 14px;
-  }
+  nav { padding: 0 12px; }
+  .main-content { padding: 28px 14px; }
+  .fp-body { padding: 14px; }
+  .nav-brand-text b { font-size: 0.76rem; }
 }

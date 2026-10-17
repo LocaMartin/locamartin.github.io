@@ -1,8 +1,10 @@
 /* ────────────────────────────────────────────────────────────
    Which modules are ATTACHED, and in what order (= sidebar order).
 
-   Attach : add its <script> (+ CSS <link>) to index.html and its id here.
-   Detach : remove its id from this list (optionally its <script>/<link> too).
+   All of these except "notes" now live in templates.js/templates.css —
+   attach/detach for those is just adding/removing the id below (no
+   separate <script>/<link> to manage anymore). "notes" still has its
+   own notes.js/notes.css pair in index.html.
    ──────────────────────────────────────────────────────────── */
 window.SIDEBAR_MODULES = [
   "home",
@@ -11,6 +13,8 @@ window.SIDEBAR_MODULES = [
   "analytics",
   "notes",
   "database",
+  "theme",
   "app",
   "nuke",
+  "ragex",
 ];

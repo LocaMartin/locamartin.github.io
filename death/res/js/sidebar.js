@@ -41,11 +41,14 @@ class SidebarEngine {
       .filter(Boolean);
     this.sidebarOpen = false;
     this.fullLoaded = new Set();
+    this.clockTimer = null;
   }
 
   init() {
     this.render();
     this.bindEvents();
+    this.updateModuleReadout(null);
+    this.startClock();
   }
 
   find(id) { return this.mods.find((m) => m.id === id); }
@@ -71,8 +74,8 @@ class SidebarEngine {
         <span class="nav-item-left">
           <span class="icon">${m.icon || ""}</span>
           <span>${m.title}</span>
-          ${m.badge ? `<span class="badge-pill">${m.badge}</span>` : ""}
-        </span>`;
+        </span>
+        ${m.badge ? `<span class="badge-pill">${m.badge}</span>` : ""}`;
       btn.addEventListener("click", () => this.openFullpage(m.id));
       nav.appendChild(btn);
 
@@ -109,6 +112,7 @@ class SidebarEngine {
     fp.classList.add("open");
     document.body.style.overflow = "hidden";
     this.setActive(id);
+    this.updateModuleReadout(m);
 
     try {
       if (!this.fullLoaded.has(id)) {
@@ -126,6 +130,7 @@ class SidebarEngine {
     if (!document.querySelector(".fullpage-panel.open")) {
       document.body.style.overflow = "";
       this.setActive(null);
+      this.updateModuleReadout(null);
     }
     try { this.find(id)?.onClose?.(); } catch (e) { console.error(`[${id}] onClose`, e); }
   }
@@ -133,6 +138,23 @@ class SidebarEngine {
   setActive(id) {
     document.querySelectorAll("#sidebar-nav-items .nav-item").forEach((b) =>
       b.classList.toggle("active", b.dataset.id === id));
+  }
+
+  /** Updates the "MODULE: X" readout in the top nav bar. Purely cosmetic. */
+  updateModuleReadout(mod) {
+    const el = document.getElementById("nav-module-readout-text");
+    if (el) el.textContent = mod ? mod.title.toUpperCase() : "HOME OVERVIEW";
+  }
+
+  startClock() {
+    const el = document.getElementById("nav-clock");
+    if (!el) return;
+    const tick = () => {
+      el.textContent = new Date().toUTCString().slice(17, 25) + " UTC";
+    };
+    tick();
+    clearInterval(this.clockTimer);
+    this.clockTimer = setInterval(tick, 1000);
   }
 
   toggleSidebar(force) {

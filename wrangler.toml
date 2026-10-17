@@ -1,9 +1,0 @@
-name = "death-worker"
-main = "worker.js"
-compatibility_date = "2026-03-01"
-
-[[d1_databases]]
-binding = "death"
-database_name = "death"
-database_id = "6344fa63-c2aa-46aa-b0ea-9aa1e3a41bb7"
-
