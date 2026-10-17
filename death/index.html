@@ -13,8 +13,8 @@
   <link rel="stylesheet" href="res/css/sidebar.css?v=4">
 
   <!-- Every module's styling, consolidated (see the file's own header for the section map).
-       Notes is the one exception — kept separate since its source wasn't available
-       when this was consolidated. -->
+       notes.css is the one exception — kept separate since its source wasn't
+       available when this was consolidated (its JS is merged in templates.js though). -->
   <link rel="stylesheet" href="res/css/templates/templates.css?v=4">
   <link rel="stylesheet" href="res/css/templates/notes.css?v=4">
 
@@ -27,9 +27,8 @@
   <script src="res/js/core/core.js?v=4" defer></script>
   <script src="res/js/sidebar.js?v=4" defer></script>
 
-  <!-- Every module's logic, consolidated. Notes stays separate (see above). -->
+  <!-- Every module's logic, consolidated (Notes' JS is in here too now — only its CSS stays separate). -->
   <script src="res/js/templates/templates.js?v=4" defer></script>
-  <script src="res/js/templates/notes.js?v=4" defer></script>
 
   <!-- Which modules are enabled + order, then auth (kicks everything off) -->
   <script src="res/js/sidebar-config.js?v=4" defer></script>
