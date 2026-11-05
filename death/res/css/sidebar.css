@@ -241,3 +241,24 @@
 @media (max-width: 600px) {
   .fp-header { padding: 12px 12px; gap: 8px; }
 }
+
+/* Reference control-panel shell — kept separate from module functionality. */
+#overlay { background: rgba(0,0,0,.66); backdrop-filter: blur(8px); }
+#sidebar { width: 320px; right: -340px; background: rgba(15,17,26,.97); border-left-color: rgba(255,255,255,.08); box-shadow: -18px 0 55px rgba(0,0,0,.35); }
+.sidebar-header { padding: 29px 24px 26px; margin: 0; border-bottom-color: rgba(255,255,255,.09); }
+.sidebar-header h2 { font-family: Inter, sans-serif; font-size: .95rem; letter-spacing: .35px; }
+.sidebar-header h2::before { content: '☷'; color: #c084fc; margin-right: 12px; font-size: 1.1rem; }
+.close-btn { border: 0; background: transparent; width: 28px; height: 28px; font-size: 1.12rem; }
+.sidebar-nav { padding: 24px 14px; gap: 7px; }
+.nav-item { padding: 11px 12px; border-radius: 9px; color: #d1d5db; font-size: .78rem; }
+.nav-item .icon { width: 20px; height: 20px; border: 0; background: transparent; color: #c8ced9; }.nav-item .icon svg { width: 15px; height: 15px; }
+.nav-item:hover,.nav-item.active { background: rgba(124,58,237,.12); border-color: rgba(168,85,247,.23); color: #fff; }.nav-item.active .icon,.nav-item:hover .icon { background: transparent; color: #c084fc; }
+.badge-pill { font-size: .56rem; background: rgba(99,102,241,.14); color: #a5b4fc; border-color: rgba(129,140,248,.28); }
+.sidebar-footer { padding: 22px 24px 26px; }.sidebar-footer a { color: #c084fc; justify-content: center; }
+
+.fullpage-panel { inset: 68px 0 0; z-index: 45; background: transparent; backdrop-filter: none; }
+.fp-header { padding: 28px max(40px, calc((100vw - 1280px)/2)); background: rgba(6,7,10,.31); border-bottom: 1px solid rgba(255,255,255,.045); }
+.fp-title { font-size: 1.04rem; }.fp-title svg { color: #c084fc; }.fp-menu,.fp-close { border: 0; background: transparent; }.fp-menu:hover,.fp-close:hover { box-shadow:none; background:rgba(255,255,255,.06); }
+.fp-body { max-width: 1280px; padding: 28px 40px 64px; }
+.fullpage-panel.flush .fp-body { padding: 0; max-width: 1280px; }
+@media (max-width: 700px) { #sidebar { width: min(320px,88vw); }.fullpage-panel { inset: 68px 0 0; }.fp-header { padding: 18px; }.fp-body { padding: 20px 18px 42px; } }

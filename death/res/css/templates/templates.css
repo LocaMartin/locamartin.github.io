@@ -466,6 +466,18 @@
   .db-sidebar { width: auto; flex: 0 0 auto; max-height: 180px; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 }
 
+/* Dashboard density and glass treatment shared by live module content. */
+.home-hero,.death-stat-card,.death-run-card,.death-entry,.stat-card,.chart-wrap,.logs-bulk-bar,.db-sidebar,.db-editor {
+  background: rgba(24,27,40,.62);
+  border-color: rgba(255,255,255,.07);
+}
+.death-action-btn { background: rgba(9,10,15,.64); border-color: rgba(255,255,255,.1); border-radius: 10px; }
+.death-action-btn:hover:not(:disabled) { background: rgba(124,58,237,.16); color: #d8b4fe; }
+.death-stats-row { gap: 14px; }.death-stat-card { padding: 17px; }.ds-num { font-size: 1.65rem; }.ds-label,.stat-card .label { font-family: var(--mono); font-size: .62rem; letter-spacing: .7px; }
+.death-runs-grid { gap: 14px; }.death-run-card { padding: 16px; }.death-entry { padding: 12px 14px; }
+.logs-search { background: rgba(9,10,15,.6); border-color: rgba(255,255,255,.1); border-radius: 10px; }.logs-chip { border-radius: 8px; }.logs-list { gap: 9px; }
+.stat-card { padding: 21px; text-align: center; }.stat-card .num { font-size: 1.75rem; }.chart-wrap { min-height: 270px; padding: 24px; }
+
 
 /* ┌──────────────────────────────────────────────────────────────────────┐
    │ THEME                                                                │

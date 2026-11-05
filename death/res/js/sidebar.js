@@ -165,8 +165,12 @@ class SidebarEngine {
 
   bindEvents() {
     document.getElementById("menu-toggle")?.addEventListener("click", () => this.toggleSidebar());
+    document.getElementById("nav-menu-trigger")?.addEventListener("click", () => this.toggleSidebar());
     document.getElementById("sidebar-close")?.addEventListener("click", () => this.toggleSidebar(false));
     document.getElementById("overlay")?.addEventListener("click", () => this.toggleSidebar(false));
+    document.querySelectorAll("[data-open-module]").forEach((button) => {
+      button.addEventListener("click", () => this.openFullpage(button.dataset.openModule));
+    });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       if (this.sidebarOpen) return this.toggleSidebar(false);
