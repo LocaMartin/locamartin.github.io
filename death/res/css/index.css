@@ -495,14 +495,10 @@ nav {
   border-bottom-color: rgba(255,255,255,.06);
   backdrop-filter: blur(20px);
 }
-.nav-left { gap: 16px; }
-.nav-menu-trigger {
-  display: inline-grid; place-items: center; padding: 7px 0; border: 0; background: transparent;
-  color: #a0a7b7; cursor: pointer;
-}
-.nav-menu-trigger:hover { color: #fff; }
-.logo { color: #c084fc; background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 12px; padding: 8px; box-shadow: 0 0 14px rgba(124,58,237,.3); }
-.logo svg { width: 22px; height: 22px; color: #fff; }
+.nav-left { gap: 12px; }
+/* Keep the original project mark unboxed: no new purple tile behind the logo. */
+.logo { color: #c084fc; background: transparent; border-radius: 0; padding: 0; box-shadow: none; }
+.logo svg { width: 31px; height: 31px; color: currentColor; }
 .nav-brand-text { gap: 2px; }
 .nav-brand-line { display: flex; align-items: center; gap: 9px; }
 .nav-brand-text b { font-size: .85rem; letter-spacing: .2px; }

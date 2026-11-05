@@ -256,7 +256,16 @@
 .badge-pill { font-size: .56rem; background: rgba(99,102,241,.14); color: #a5b4fc; border-color: rgba(129,140,248,.28); }
 .sidebar-footer { padding: 22px 24px 26px; }.sidebar-footer a { color: #c084fc; justify-content: center; }
 
-.fullpage-panel { inset: 68px 0 0; z-index: 45; background: transparent; backdrop-filter: none; }
+.fullpage-panel {
+  inset: 68px 0 0;
+  z-index: 45;
+  /* The module layer must fully cover the overview behind it. */
+  background:
+    radial-gradient(circle at 15% 12%, rgba(124,58,237,.10), transparent 34%),
+    radial-gradient(circle at 86% 76%, rgba(168,85,247,.06), transparent 38%),
+    #090a0f;
+  backdrop-filter: none;
+}
 .fp-header { padding: 28px max(40px, calc((100vw - 1280px)/2)); background: rgba(6,7,10,.31); border-bottom: 1px solid rgba(255,255,255,.045); }
 .fp-title { font-size: 1.04rem; }.fp-title svg { color: #c084fc; }.fp-menu,.fp-close { border: 0; background: transparent; }.fp-menu:hover,.fp-close:hover { box-shadow:none; background:rgba(255,255,255,.06); }
 .fp-body { max-width: 1280px; padding: 28px 40px 64px; }
