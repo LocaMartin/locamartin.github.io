@@ -266,8 +266,8 @@
     #090a0f;
   backdrop-filter: none;
 }
-.fp-header { padding: 28px max(40px, calc((100vw - 1280px)/2)); background: rgba(6,7,10,.31); border-bottom: 1px solid rgba(255,255,255,.045); }
+.fp-header { padding: 28px 40px; background: rgba(6,7,10,.31); border-bottom: 1px solid rgba(255,255,255,.045); }
 .fp-title { font-size: 1.04rem; }.fp-title svg { color: #c084fc; }.fp-menu,.fp-close { border: 0; background: transparent; }.fp-menu:hover,.fp-close:hover { box-shadow:none; background:rgba(255,255,255,.06); }
-.fp-body { max-width: 1280px; padding: 28px 40px 64px; }
-.fullpage-panel.flush .fp-body { padding: 0; max-width: 1280px; }
+.fp-body { max-width: none; margin: 0; padding: 28px 40px 64px; }
+.fullpage-panel.flush .fp-body { padding: 0; max-width: none; }
 @media (max-width: 700px) { #sidebar { width: min(320px,88vw); }.fullpage-panel { inset: 68px 0 0; }.fp-header { padding: 18px; }.fp-body { padding: 20px 18px 42px; } }

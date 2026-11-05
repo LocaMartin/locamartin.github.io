@@ -28,8 +28,6 @@ window.ModuleRegistry = {
   },
 };
 
-const ICON_MENU = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>`;
-
 class SidebarEngine {
   constructor(ids) {
     this.mods = ids
@@ -85,13 +83,11 @@ class SidebarEngine {
       fp.id = `fp-${m.id}`;
       fp.innerHTML = `
         <div class="fp-header">
-          <button class="fp-menu" data-menu aria-label="Open menu">${ICON_MENU}</button>
           <div class="fp-title">${m.icon || ""}<span>${m.title}</span></div>
           <div class="fp-actions" id="fp-actions-${m.id}"></div>
           <button class="fp-close" data-close aria-label="Close">✕</button>
         </div>
         <div class="fp-body" id="fp-body-${m.id}"></div>`;
-      fp.querySelector("[data-menu]").addEventListener("click", () => this.toggleSidebar(true));
       fp.querySelector("[data-close]").addEventListener("click", () => this.closeFullpage(m.id));
       fullpages.appendChild(fp);
     });
